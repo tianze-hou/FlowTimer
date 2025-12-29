@@ -1,0 +1,2991 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flow Timer v1.0</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌊</text></svg>">
+
+  <style>
+    :root {
+      --bg-primary: #0a0f1a;
+      --bg-secondary: #111827;
+      --bg-tertiary: #1f2937;
+      --bg-elevated: #252f3f;
+
+      --accent-primary: #3b82f6;
+      --accent-primary-light: #60a5fa;
+      --accent-secondary: #f59e0b;
+      --accent-success: #10b981;
+      --accent-danger: #ef4444;
+      --accent-purple: #8b5cf6;
+      --accent-pink: #ec4899;
+
+      --text-primary: #f9fafb;
+      --text-secondary: #9ca3af;
+      --text-muted: #6b7280;
+
+      --border-subtle: rgba(255, 255, 255, 0.06);
+      --border-default: rgba(255, 255, 255, 0.1);
+      --border-emphasis: rgba(255, 255, 255, 0.15);
+
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.4);
+      --shadow-glow: 0 0 30px rgba(59, 130, 246, 0.3);
+
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+      --space-2xl: 48px;
+
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+      --radius-full: 9999px;
+
+      --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-slow: 400ms cubic-bezier(0.16, 1, 0.3, 1);
+
+      --emoji-font: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", system-ui, sans-serif;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+      padding: var(--space-md) var(--space-lg);
+      font-size: 0.9rem;
+      font-weight: 600;
+      border: none;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      text-decoration: none;
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-primary-light));
+      color: white;
+      box-shadow: var(--shadow-md), 0 0 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg), var(--shadow-glow);
+    }
+
+    .btn-secondary {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-default);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-elevated);
+      border-color: var(--border-emphasis);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, var(--accent-success), #059669);
+      color: white;
+    }
+
+    .btn-warning {
+      background: linear-gradient(135deg, var(--accent-secondary), #d97706);
+      color: white;
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, var(--accent-danger), #dc2626);
+      color: white;
+    }
+
+    .btn-purple {
+      background: linear-gradient(135deg, var(--accent-purple), #7c3aed);
+      color: white;
+    }
+
+    .btn-icon {
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      transition: all var(--transition-fast);
+    }
+
+    .btn-icon:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-primary);
+    }
+
+    .input {
+      width: 100%;
+      padding: var(--space-md);
+      font-size: 1rem;
+      color: var(--text-primary);
+      background: var(--bg-primary);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      transition: all var(--transition-fast);
+    }
+
+    .input:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+
+    .input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-md);
+    }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 180px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-lg);
+      font-weight: 600;
+      box-shadow: var(--shadow-lg);
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transition: all var(--transition-normal);
+    }
+
+    #toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    #toast.success {
+      border-color: var(--accent-success);
+    }
+
+    #toast.error {
+      border-color: var(--accent-danger);
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all var(--transition-normal);
+    }
+
+    .modal-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-xl);
+      padding: var(--space-xl);
+      width: 90%;
+      max-width: 420px;
+      box-shadow: var(--shadow-lg);
+      transform: scale(0.95);
+      transition: transform var(--transition-normal);
+    }
+
+    .modal-overlay.show .modal {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: var(--space-lg);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: var(--space-sm);
+      justify-content: flex-end;
+      margin-top: var(--space-lg);
+    }
+
+    /* Setup */
+    #setup-area {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: var(--space-xl);
+    }
+
+    .setup-header {
+      text-align: center;
+      margin-bottom: var(--space-2xl);
+    }
+
+    .setup-header h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent-primary-light), var(--accent-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: var(--space-sm);
+    }
+
+    .setup-header p {
+      color: var(--text-secondary);
+    }
+
+    .config-section {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      margin-bottom: var(--space-lg);
+    }
+
+    .config-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: var(--space-md);
+      margin-bottom: var(--space-md);
+    }
+
+    .config-title {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .config-actions {
+      display: flex;
+      gap: var(--space-sm);
+      flex-wrap: wrap;
+    }
+
+    .btn-config {
+      padding: var(--space-sm) var(--space-md);
+      font-size: 0.85rem;
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-default);
+      color: var(--text-primary);
+    }
+
+    .btn-config:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--accent-primary);
+    }
+
+    .btn-config.primary {
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
+      color: white;
+    }
+
+    .preset-list {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .preset-list:empty::after {
+      content: "暂无保存的预设";
+      display: block;
+      text-align: center;
+      padding: var(--space-lg);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .preset-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-md);
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-sm);
+      transition: all var(--transition-fast);
+    }
+
+    .preset-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--border-default);
+    }
+
+    .preset-item.active {
+      background: rgba(59, 130, 246, 0.1);
+      border-color: var(--accent-primary);
+    }
+
+    .preset-info {
+      flex: 1;
+    }
+
+    .preset-name {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .preset-meta {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .preset-badge {
+      display: inline-block;
+      font-size: 0.65rem;
+      padding: 2px 6px;
+      margin-left: var(--space-sm);
+      border-radius: 4px;
+      background: rgba(245, 158, 11, 0.2);
+      color: var(--accent-secondary);
+    }
+
+    .preset-actions {
+      display: flex;
+      gap: 4px;
+    }
+
+    /* Tasks list */
+    .task-list {
+      margin-bottom: var(--space-lg);
+    }
+
+    .task-item {
+      display: grid;
+      grid-template-columns: 32px auto 1fr 72px 36px;
+      gap: var(--space-md);
+      align-items: center;
+      padding: var(--space-md);
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-sm);
+      transition: all var(--transition-fast);
+    }
+
+    .task-item:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: var(--border-default);
+    }
+
+    .task-item.sortable-ghost {
+      opacity: 0.3;
+    }
+
+    .task-item.sortable-drag {
+      background: var(--bg-elevated);
+      box-shadow: var(--shadow-md);
+    }
+
+    .task-handle {
+      cursor: grab;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+    }
+
+    .task-handle:active {
+      cursor: grabbing;
+    }
+
+    .task-input-emoji {
+      text-align: center;
+      font-family: var(--emoji-font);
+      font-size: 1.05rem;
+      min-width: 52px;
+      max-width: 180px;
+      /* JS 会动态设 width，但不让它无限长 */
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+
+    .task-input-mins {
+      text-align: center;
+    }
+
+    .btn-add-task {
+      width: 100%;
+      padding: var(--space-md);
+      border: 2px dashed var(--border-default);
+      border-radius: var(--radius-md);
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .btn-add-task:hover {
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+      background: rgba(59, 130, 246, 0.05);
+    }
+
+    .setup-footer {
+      margin-top: var(--space-lg);
+    }
+
+    .setup-footer .btn {
+      width: 100%;
+    }
+
+    /* Running */
+    #running-area {
+      display: none;
+      min-height: 100vh;
+      width: 100%;
+      background: radial-gradient(ellipse at center top, var(--bg-secondary) 0%, var(--bg-primary) 60%);
+      position: relative;
+      padding-bottom: 160px;
+    }
+
+    .eta-bar {
+      position: fixed;
+      top: var(--space-md);
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: var(--space-lg);
+      padding: var(--space-md) var(--space-lg);
+      background: rgba(17, 24, 39, 0.9);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-full);
+      z-index: 100;
+    }
+
+    .eta-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-size: 0.85rem;
+    }
+
+    .eta-label {
+      color: var(--text-muted);
+    }
+
+    .eta-value {
+      font-weight: 700;
+      color: var(--accent-primary-light);
+    }
+
+    .eta-divider {
+      width: 1px;
+      height: 16px;
+      background: var(--border-default);
+    }
+
+    .main-display {
+      text-align: center;
+      padding-top: 12vh;
+    }
+
+    .status-message {
+      height: 28px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--accent-danger);
+    }
+
+    .task-emoji {
+      font-family: var(--emoji-font);
+      font-size: 8rem;
+      line-height: 1;
+      filter: drop-shadow(0 0 40px rgba(59, 130, 246, 0.3));
+      animation: float 3s ease-in-out infinite;
+      white-space: nowrap;
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    .task-name {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--accent-secondary);
+      margin: var(--space-md) 0;
+      padding: 0 var(--space-lg);
+      word-break: break-word;
+    }
+
+    .flow-indicator {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+      padding: var(--space-md) var(--space-lg);
+      margin: var(--space-md) auto;
+      width: fit-content;
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(236, 72, 153, 0.15));
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: var(--radius-full);
+      font-weight: 600;
+      color: var(--accent-purple);
+      animation: pulse-glow 2s infinite;
+    }
+
+    .flow-indicator.show {
+      display: inline-flex;
+    }
+
+    @keyframes pulse-glow {
+
+      0%,
+      100% {
+        box-shadow: 0 0 20px rgba(139, 92, 246, 0.2);
+      }
+
+      50% {
+        box-shadow: 0 0 40px rgba(139, 92, 246, 0.4);
+      }
+    }
+
+    .timer-display {
+      font-size: 7rem;
+      font-weight: 800;
+      font-family: "SF Mono", "Fira Code", monospace;
+      letter-spacing: -3px;
+      margin: var(--space-md) 0;
+      transition: color var(--transition-normal);
+    }
+
+    .timer-display.overtime {
+      color: var(--accent-purple);
+    }
+
+    .timer-display.distracted {
+      color: var(--accent-danger);
+    }
+
+    .overtime-label {
+      display: none;
+      font-size: 1rem;
+      color: var(--accent-purple);
+      margin-top: calc(var(--space-sm) * -1);
+    }
+
+    .overtime-label.show {
+      display: block;
+    }
+
+    .control-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-md);
+      justify-content: center;
+      margin-top: var(--space-xl);
+    }
+
+    .btn-control {
+      min-width: 140px;
+      padding: var(--space-md) var(--space-xl);
+      font-size: 1rem;
+      border-radius: var(--radius-lg);
+    }
+
+    .forgot-btn {
+      display: none;
+      margin-top: var(--space-lg);
+    }
+
+    .forgot-btn.show {
+      display: inline-flex;
+    }
+
+    .stop-btn {
+      margin-top: var(--space-2xl);
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: color var(--transition-fast);
+    }
+
+    .stop-btn:hover {
+      color: var(--text-secondary);
+    }
+
+    /* Side panel */
+    .panel-trigger {
+      position: fixed;
+      top: 50%;
+      right: 0;
+      transform: translateY(-50%);
+      z-index: 500;
+      cursor: pointer;
+      transition: right var(--transition-slow);
+    }
+
+    .panel-trigger.hidden {
+      right: 340px;
+    }
+
+    .trigger-tab {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-md);
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-default);
+      border-right: none;
+      border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      transition: all var(--transition-fast);
+    }
+
+    .trigger-tab:hover {
+      background: var(--bg-tertiary);
+      border-color: var(--accent-primary);
+      padding-left: var(--space-lg);
+    }
+
+    .trigger-arrow {
+      width: 10px;
+      height: 10px;
+      border-left: 2px solid var(--accent-primary);
+      border-bottom: 2px solid var(--accent-primary);
+      transform: rotate(45deg);
+      transition: transform var(--transition-fast);
+    }
+
+    .panel-trigger.hidden .trigger-arrow {
+      transform: rotate(-135deg);
+    }
+
+    #side-panel {
+      position: fixed;
+      top: 0;
+      right: -360px;
+      width: 340px;
+      height: 100%;
+      background: rgba(17, 24, 39, 0.95);
+      backdrop-filter: blur(20px);
+      border-left: 1px solid var(--border-default);
+      box-shadow: var(--shadow-lg);
+      padding: var(--space-lg);
+      overflow-y: auto;
+      z-index: 600;
+      transition: right var(--transition-slow);
+    }
+
+    #side-panel.open {
+      right: 0;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: var(--space-md);
+      margin-bottom: var(--space-md);
+      border-bottom: 1px solid var(--border-default);
+    }
+
+    .panel-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, var(--accent-primary-light), var(--accent-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .panel-section-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      margin: var(--space-lg) 0 var(--space-md);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .panel-section-label::before {
+      content: "";
+      width: 4px;
+      height: 4px;
+      background: var(--accent-primary);
+      border-radius: 50%;
+    }
+
+    .panel-tools {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-lg);
+    }
+
+    .panel-tool-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-md);
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      color: var(--text-primary);
+    }
+
+    .panel-tool-btn:hover {
+      background: rgba(255, 255, 255, 0.07);
+      border-color: var(--border-emphasis);
+      transform: translateY(-1px);
+    }
+
+    .panel-tool-left {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      min-width: 0;
+      flex: 1;
+    }
+
+    .panel-tool-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .panel-tool-sub {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .panel-tool-chip {
+      font-size: 0.75rem;
+      padding: 6px 10px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border-default);
+      background: rgba(0, 0, 0, 0.25);
+      color: var(--text-secondary);
+      flex-shrink: 0;
+    }
+
+    .panel-tool-btn.active {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.16), rgba(236, 72, 153, 0.12));
+      border-color: rgba(139, 92, 246, 0.35);
+      box-shadow: 0 0 26px rgba(139, 92, 246, 0.18);
+    }
+
+    .panel-tool-btn.active .panel-tool-chip {
+      border-color: rgba(139, 92, 246, 0.45);
+      color: #e9d5ff;
+      background: rgba(139, 92, 246, 0.18);
+    }
+
+    .side-task {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      padding: var(--space-md);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid transparent;
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-sm);
+      transition: all var(--transition-fast);
+    }
+
+    .side-task:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .side-task.active {
+      background: rgba(59, 130, 246, 0.1);
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.1);
+    }
+
+    .side-task-emoji {
+      font-size: 1.4rem;
+      font-family: var(--emoji-font);
+      white-space: nowrap;
+    }
+
+    .side-task-name {
+      flex: 1;
+      font-weight: 500;
+      word-break: break-word;
+    }
+
+    .side-task-handle {
+      cursor: grab;
+      color: var(--text-muted);
+    }
+
+    .side-task-handle:active {
+      cursor: grabbing;
+    }
+
+    /* Progress bottom */
+    .progress-container {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(10, 15, 26, 0.95);
+      backdrop-filter: blur(20px);
+      padding: var(--space-lg) var(--space-xl) var(--space-xl);
+      border-top: 1px solid var(--border-default);
+      z-index: 100;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: var(--space-md);
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .progress-track {
+      height: 28px;
+      display: flex;
+      gap: 3px;
+      padding: 3px;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .progress-segment {
+      flex: var(--segment-flex, 1);
+      height: 100%;
+      border-radius: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      padding: 0 4px;
+      min-width: 18px;
+    }
+
+    .progress-segment:hover {
+      transform: scaleY(1.08);
+      z-index: 5;
+    }
+
+    .progress-segment.completed {
+      background: linear-gradient(135deg, var(--accent-success), #059669);
+    }
+
+    .progress-segment.current {
+      background: linear-gradient(135deg, var(--accent-primary), #2563eb);
+    }
+
+    .progress-segment.current.overtime {
+      background: linear-gradient(135deg, var(--accent-purple), #7c3aed);
+    }
+
+    .progress-segment.future {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .segment-fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.25);
+      border-radius: 11px;
+      transition: width var(--transition-fast);
+    }
+
+    .segment-emoji {
+      font-size: 0.85rem;
+      z-index: 1;
+      opacity: 0.95;
+      font-family: var(--emoji-font);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    .segment-tooltip {
+      position: absolute;
+      bottom: calc(100% + 12px);
+      left: 50%;
+      transform: translateX(-50%);
+      padding: var(--space-md);
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: all var(--transition-fast);
+      box-shadow: var(--shadow-md);
+      z-index: 100;
+    }
+
+    .segment-tooltip::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 6px solid transparent;
+      border-top-color: var(--bg-elevated);
+    }
+
+    .progress-segment:hover .segment-tooltip {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(-4px);
+    }
+
+    .tooltip-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .tooltip-time {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .tooltip-badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      margin-top: 6px;
+      border-radius: 4px;
+    }
+
+    .tooltip-badge.completed {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--accent-success);
+    }
+
+    .tooltip-badge.current {
+      background: rgba(59, 130, 246, 0.2);
+      color: var(--accent-primary);
+    }
+
+    .tooltip-badge.overtime {
+      background: rgba(139, 92, 246, 0.2);
+      color: var(--accent-purple);
+    }
+
+    /* Log */
+    #log-area {
+      display: none;
+      max-width: 700px;
+      margin: 0 auto;
+      padding: var(--space-xl);
+    }
+
+    .log-header {
+      text-align: center;
+      margin-bottom: var(--space-xl);
+    }
+
+    .log-header h2 {
+      font-size: 1.8rem;
+      color: var(--accent-primary-light);
+      margin-bottom: var(--space-sm);
+    }
+
+    .tabs {
+      display: flex;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: var(--radius-md);
+      padding: 4px;
+      margin-bottom: var(--space-lg);
+      gap: 4px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+      padding: var(--space-md) var(--space-lg);
+      border: none;
+      background: transparent;
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .tab-btn:hover {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .tab-btn.active {
+      background: var(--accent-primary);
+      color: white;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .log-content {
+      background: var(--bg-primary);
+      padding: var(--space-lg);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-subtle);
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      font-family: "SF Mono", "Fira Code", monospace;
+      font-size: 0.85rem;
+      line-height: 1.8;
+      margin-bottom: var(--space-lg);
+    }
+
+    .log-actions {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+
+    /* Distraction modal */
+    .distraction-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-md);
+      margin-bottom: var(--space-lg);
+    }
+
+    .distraction-option {
+      padding: var(--space-md);
+      background: rgba(255, 255, 255, 0.03);
+      border: 2px solid var(--border-default);
+      border-radius: var(--radius-md);
+      text-align: center;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      color: var(--text-primary);
+    }
+
+    .distraction-option:hover {
+      background: rgba(239, 68, 68, 0.1);
+      border-color: var(--accent-danger);
+    }
+
+    .distraction-time {
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .distraction-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .custom-distraction {
+      display: flex;
+      gap: var(--space-md);
+    }
+
+    .custom-distraction .input {
+      margin: 0;
+    }
+
+    /* Flash note */
+    .textarea {
+      width: 100%;
+      min-height: 130px;
+      resize: vertical;
+      padding: var(--space-md);
+      font-size: 0.95rem;
+      color: var(--text-primary);
+      background: var(--bg-primary);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      transition: all var(--transition-fast);
+      line-height: 1.6;
+    }
+
+    .textarea:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+
+    .helper {
+      margin-top: var(--space-sm);
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 640px) {
+      .setup-header h1 {
+        font-size: 2rem;
+      }
+
+      .task-item {
+        grid-template-columns: 28px auto 1fr 60px 32px;
+        gap: var(--space-sm);
+        padding: var(--space-sm);
+      }
+
+      .task-emoji {
+        font-size: 5rem;
+      }
+
+      .task-name {
+        font-size: 1.8rem;
+      }
+
+      .timer-display {
+        font-size: 4rem;
+      }
+
+      .eta-bar {
+        flex-direction: column;
+        gap: var(--space-sm);
+        padding: var(--space-sm) var(--space-md);
+      }
+
+      .eta-divider {
+        display: none;
+      }
+
+      .control-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .btn-control {
+        width: 200px;
+      }
+
+      .progress-track {
+        height: 24px;
+      }
+
+      .distraction-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    #file-input {
+      display: none;
+    }
+
+    .icon {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+
+    /* emoji width measure element */
+    #emoji-measure {
+      position: fixed;
+      top: -9999px;
+      left: -9999px;
+      visibility: hidden;
+      white-space: pre;
+      font-family: var(--emoji-font);
+      font-size: 1.05rem;
+      padding: 0;
+      margin: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- SVG icons -->
+  <svg style="display:none">
+    <symbol id="icon-drag" viewBox="0 0 24 24">
+      <path
+        d="M11 18c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zm-2-8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm6 4c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
+    </symbol>
+    <symbol id="icon-close" viewBox="0 0 24 24">
+      <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+    </symbol>
+    <symbol id="icon-download" viewBox="0 0 24 24">
+      <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+    </symbol>
+    <symbol id="icon-upload" viewBox="0 0 24 24">
+      <path d="M9 16h6v-6h4l-7-7-7 7h4v6zm-4 2h14v2H5v-2z" />
+    </symbol>
+    <symbol id="icon-save" viewBox="0 0 24 24">
+      <path
+        d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z" />
+    </symbol>
+    <symbol id="icon-delete" viewBox="0 0 24 24">
+      <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+    </symbol>
+    <symbol id="icon-edit" viewBox="0 0 24 24">
+      <path
+        d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+    </symbol>
+    <symbol id="icon-table" viewBox="0 0 24 24">
+      <path d="M3 3h18v18H3V3zm16 4H5v4h14V7zm0 6H5v4h14v-4z" />
+    </symbol>
+    <symbol id="icon-list" viewBox="0 0 24 24">
+      <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z" />
+    </symbol>
+    <symbol id="icon-folder" viewBox="0 0 24 24">
+      <path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z" />
+    </symbol>
+    <symbol id="icon-note" viewBox="0 0 24 24">
+      <path
+        d="M16 2H8C6.9 2 6 2.9 6 4v16c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 17H9v-2h6v2zm0-4H9v-2h6v2zm0-4H9V9h6v2z" />
+    </symbol>
+    <symbol id="icon-bell" viewBox="0 0 24 24">
+      <path
+        d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6V11c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5S10.5 3.17 10.5 4v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
+    </symbol>
+  </svg>
+
+  <!-- measure span -->
+  <span id="emoji-measure" aria-hidden="true"></span>
+
+  <div id="toast"></div>
+
+  <!-- Save preset modal -->
+  <div id="save-modal" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">💾 保存为预设</div>
+      <input type="text" id="preset-name-input" class="input" placeholder="输入预设名称，如：晨间流程">
+      <div class="modal-actions">
+        <button class="btn btn-secondary" data-action="cancel-save">取消</button>
+        <button class="btn btn-primary" data-action="confirm-save">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Flash note modal -->
+  <div id="flash-modal" class="modal-overlay">
+    <div class="modal" style="max-width:520px">
+      <div class="modal-header">🗒️ 闪念记录</div>
+      <textarea id="flash-input" class="textarea"
+        placeholder="现在脑子里突然蹦出来的想法是什么？&#10;（例如：等会记得给XX回消息 / 想起一个灵感 / 需要买的东西…）"></textarea>
+      <div class="helper" id="flash-helper">会自动带上时间与当前步骤，稍后会汇总到日志里。</div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" data-action="cancel-flash">取消</button>
+        <button class="btn btn-primary" data-action="save-flash">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Distraction modal -->
+  <div id="distraction-modal" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">🤔 我忘记停止了...</div>
+      <p style="color: var(--text-secondary); margin-bottom: var(--space-lg);">大概是多久之前分心的？</p>
+      <div class="distraction-grid" id="distraction-grid">
+        <button class="distraction-option" data-mins="1"><span class="distraction-time">1分钟</span><span
+            class="distraction-label">刚刚</span></button>
+        <button class="distraction-option" data-mins="3"><span class="distraction-time">3分钟</span><span
+            class="distraction-label">一小会儿</span></button>
+        <button class="distraction-option" data-mins="5"><span class="distraction-time">5分钟</span><span
+            class="distraction-label">有一阵了</span></button>
+        <button class="distraction-option" data-mins="10"><span class="distraction-time">10分钟</span><span
+            class="distraction-label">挺久的</span></button>
+        <button class="distraction-option" data-mins="15"><span class="distraction-time">15分钟</span><span
+            class="distraction-label">很久了</span></button>
+        <button class="distraction-option" data-mins="30"><span class="distraction-time">30分钟</span><span
+            class="distraction-label">完全忘了</span></button>
+      </div>
+      <div class="custom-distraction">
+        <input type="number" id="custom-distraction-input" class="input" placeholder="自定义分钟数" min="1">
+        <button class="btn btn-primary" data-action="apply-custom-distraction">确定</button>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" data-action="cancel-distraction">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <input type="file" id="file-input" accept=".json">
+
+  <!-- Setup -->
+  <div id="setup-area">
+    <div class="setup-header">
+      <h1>🌊 Flow Timer</h1>
+      <p>神经多样性友好的心流计时器</p>
+    </div>
+
+    <div class="card">
+      <div style="padding: var(--space-lg);">
+        <div class="config-section">
+          <div class="config-header">
+            <div class="config-title">
+              <svg class="icon">
+                <use href="#icon-folder"></use>
+              </svg>
+              配置管理
+            </div>
+            <div class="config-actions">
+              <button class="btn btn-config" data-action="export">
+                <svg class="icon">
+                  <use href="#icon-download"></use>
+                </svg> 导出
+              </button>
+              <button class="btn btn-config" data-action="import">
+                <svg class="icon">
+                  <use href="#icon-upload"></use>
+                </svg> 导入
+              </button>
+              <button class="btn btn-config primary" data-action="save-preset">
+                <svg class="icon">
+                  <use href="#icon-save"></use>
+                </svg> 存为预设
+              </button>
+            </div>
+          </div>
+          <div class="preset-list" id="preset-list"></div>
+        </div>
+
+        <div class="task-list" id="task-list"></div>
+        <button class="btn-add-task" data-action="add-task">+ 添加步骤</button>
+      </div>
+
+      <div class="setup-footer" style="padding: 0 var(--space-lg) var(--space-lg);">
+        <button class="btn btn-primary" data-action="start">🚀 开始执行</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Running -->
+  <div id="running-area">
+    <div class="eta-bar">
+      <div class="eta-item"><span class="eta-label">进度</span><span class="eta-value" id="eta-progress">1/3</span></div>
+      <div class="eta-divider"></div>
+      <div class="eta-item"><span class="eta-label">剩余</span><span class="eta-value" id="eta-remaining">12分钟</span>
+      </div>
+      <div class="eta-divider"></div>
+      <div class="eta-item"><span class="eta-label">完成</span><span class="eta-value" id="eta-finish">09:30</span></div>
+    </div>
+
+    <div class="panel-trigger" id="panel-trigger">
+      <div class="trigger-tab">
+        <div class="trigger-arrow"></div>
+      </div>
+    </div>
+
+    <div id="side-panel">
+      <div class="panel-header">
+        <h3 class="panel-title">📋 菜单面板</h3>
+        <button class="btn-icon" data-action="close-panel" aria-label="关闭面板">
+          <svg class="icon">
+            <use href="#icon-close"></use>
+          </svg>
+        </button>
+      </div>
+
+      <div class="panel-tools">
+        <button class="panel-tool-btn" data-action="open-flash" id="flash-btn">
+          <div class="panel-tool-left">
+            <svg class="icon" style="color:var(--accent-primary-light)">
+              <use href="#icon-note"></use>
+            </svg>
+            <div style="display:flex;flex-direction:column;min-width:0;flex:1;align-items:center;justify-content:center">
+              <span class="panel-tool-title">闪念记录</span>
+              <span class="panel-tool-sub">把灵感先放这里</span>
+            </div>
+          </div>
+          <span class="panel-tool-chip" id="flash-chip">0 条</span>
+        </button>
+
+        <button class="panel-tool-btn" data-action="toggle-chime" id="chime-btn">
+          <div class="panel-tool-left">
+            <svg class="icon" style="color:var(--accent-purple)">
+              <use href="#icon-bell"></use>
+            </svg>
+            <div style="display:flex;flex-direction:column;min-width:0;flex:1;align-items:center;justify-content:center">
+              <span class="panel-tool-title">敲钟报时</span>
+              <span class="panel-tool-sub">柔和提醒，不打断</span>
+            </div>
+          </div>
+          <span class="panel-tool-chip" id="chime-chip">关闭</span>
+        </button>
+      </div>
+
+      <div class="panel-section-label">正在进行</div>
+      <div id="active-task-slot"></div>
+      <div class="panel-section-label">后续任务 (可拖拽)</div>
+      <div id="future-task-list"></div>
+    </div>
+
+    <div class="main-display">
+      <div class="status-message" id="status-message"></div>
+      <div class="task-emoji" id="display-emoji">🚀</div>
+      <h2 class="task-name" id="display-name"></h2>
+      <div class="flow-indicator" id="flow-indicator"><span>🌊</span><span>心流模式 - 继续专注吧！</span></div>
+      <div class="timer-display" id="display-time">00:00</div>
+      <div class="overtime-label" id="overtime-label">超时专注中 ⏱️</div>
+
+      <div class="control-buttons">
+        <button class="btn btn-warning btn-control" id="pause-btn" data-action="pause">暂停</button>
+        <button class="btn btn-success btn-control" data-action="complete">✓ 完成步骤</button>
+      </div>
+
+      <button class="btn btn-secondary forgot-btn" id="forgot-btn" data-action="forgot">🤔 我忘记停止了</button>
+      <button class="stop-btn" data-action="stop">中止并导出日志</button>
+    </div>
+
+    <div class="progress-container">
+      <div class="progress-header">
+        <span id="progress-label">任务进度</span>
+        <span id="progress-percent">0%</span>
+      </div>
+      <div class="progress-track" id="progress-track"></div>
+    </div>
+  </div>
+
+  <!-- Log -->
+  <div id="log-area">
+    <div class="log-header">
+      <h2>✅ 今日 Flow 已达成</h2>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="table">
+        <svg class="icon">
+          <use href="#icon-table"></use>
+        </svg> 表格模式
+      </button>
+      <button class="tab-btn" data-tab="list">
+        <svg class="icon">
+          <use href="#icon-list"></use>
+        </svg> 列表模式
+      </button>
+    </div>
+
+    <pre class="log-content" id="log-content"></pre>
+
+    <div class="log-actions">
+      <button class="btn btn-primary" data-action="copy-log">复制到剪贴板</button>
+      <button class="btn btn-secondary" data-action="restart">返回首页</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+  <script>
+    // ==================== Utils ====================
+    const Utils = {
+      uid() {
+        if (window.crypto?.randomUUID) return crypto.randomUUID();
+        return "id_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2);
+      },
+      clampInt(n, min, max) {
+        const x = Number.parseInt(n, 10);
+        if (Number.isNaN(x)) return min;
+        return Math.min(max, Math.max(min, x));
+      },
+      deepClone(obj) {
+        return JSON.parse(JSON.stringify(obj));
+      },
+      formatTime(date) {
+        return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      },
+      safeTrim(s) {
+        return String(s ?? "").trim();
+      }
+    };
+
+    // ==================== State ====================
+    const State = {
+      tasks: [],
+      presets: [],
+      currentPresetId: null,
+
+      currentTaskIndex: 0,
+      timeLeft: 0,
+      isRunning: false,
+      isPaused: false,
+      isOvertime: false,
+      overtimeSeconds: 0,
+
+      logs: [],
+      logMode: "table",
+
+      taskStats: {
+        pauses: 0,
+        pauseDuration: 0, // seconds
+        pauseStart: null, // timestamp ms
+        startTime: null // timestamp ms
+      },
+
+      routineStartTime: null,
+
+      // new: flashes / chime
+      flashes: [], // { time, task, text }
+      chimeMins: 0,
+      routineActiveSeconds: 0,
+      lastActiveUpdate: null,
+      nextChimeAtActiveSeconds: null
+    };
+
+    // ==================== DOM ====================
+    const DOM = {};
+    function cacheDOM() {
+      DOM.setupArea = document.getElementById("setup-area");
+      DOM.runningArea = document.getElementById("running-area");
+      DOM.logArea = document.getElementById("log-area");
+
+      DOM.taskList = document.getElementById("task-list");
+      DOM.presetList = document.getElementById("preset-list");
+
+      DOM.saveModal = document.getElementById("save-modal");
+      DOM.distractionModal = document.getElementById("distraction-modal");
+      DOM.flashModal = document.getElementById("flash-modal");
+      DOM.presetNameInput = document.getElementById("preset-name-input");
+      DOM.customDistractionInput = document.getElementById("custom-distraction-input");
+      DOM.distractionGrid = document.getElementById("distraction-grid");
+      DOM.fileInput = document.getElementById("file-input");
+
+      DOM.flashInput = document.getElementById("flash-input");
+      DOM.flashChip = document.getElementById("flash-chip");
+      DOM.chimeBtn = document.getElementById("chime-btn");
+      DOM.chimeChip = document.getElementById("chime-chip");
+
+      DOM.displayEmoji = document.getElementById("display-emoji");
+      DOM.displayName = document.getElementById("display-name");
+      DOM.displayTime = document.getElementById("display-time");
+      DOM.statusMessage = document.getElementById("status-message");
+      DOM.flowIndicator = document.getElementById("flow-indicator");
+      DOM.overtimeLabel = document.getElementById("overtime-label");
+      DOM.pauseBtn = document.getElementById("pause-btn");
+      DOM.forgotBtn = document.getElementById("forgot-btn");
+
+      DOM.etaProgress = document.getElementById("eta-progress");
+      DOM.etaRemaining = document.getElementById("eta-remaining");
+      DOM.etaFinish = document.getElementById("eta-finish");
+
+      DOM.progressTrack = document.getElementById("progress-track");
+      DOM.progressPercent = document.getElementById("progress-percent");
+
+      DOM.panelTrigger = document.getElementById("panel-trigger");
+      DOM.sidePanel = document.getElementById("side-panel");
+      DOM.activeTaskSlot = document.getElementById("active-task-slot");
+      DOM.futureTaskList = document.getElementById("future-task-list");
+
+      DOM.logContent = document.getElementById("log-content");
+      DOM.toast = document.getElementById("toast");
+
+      DOM.emojiMeasure = document.getElementById("emoji-measure");
+    }
+
+    // ==================== Storage ====================
+    const Storage = {
+      keys: {
+        tasks: "flow_v1_tasks",
+        presets: "flow_v1_presets",
+        currentPreset: "flow_v1_current_preset",
+        chimeMins: "flow_v1_chime_mins"
+      },
+
+      defaultTasks() {
+        return [
+          { id: Utils.uid(), emoji: "☀️", name: "晨间伸展", mins: 5 },
+          { id: Utils.uid(), emoji: "🍵", name: "喝一杯热水", mins: 2 },
+          { id: Utils.uid(), emoji: "📝", name: "检查日程", mins: 5 }
+        ];
+      },
+
+      defaultPresets() {
+        return [
+          {
+            id: "morning",
+            name: "晨间流程",
+            tasks: [
+              { id: Utils.uid(), emoji: "☀️", name: "晨间伸展", mins: 5 },
+              { id: Utils.uid(), emoji: "🍵", name: "喝一杯热水", mins: 2 },
+              { id: Utils.uid(), emoji: "📝", name: "检查日程", mins: 5 }
+            ],
+            createdAt: Date.now(),
+            source: "builtin"
+          },
+          {
+            id: "work",
+            name: "工作启动",
+            tasks: [
+              { id: Utils.uid(), emoji: "🎯", name: "确定今日目标", mins: 3 },
+              { id: Utils.uid(), emoji: "📧", name: "处理紧急邮件", mins: 10 },
+              { id: Utils.uid(), emoji: "💻", name: "开始深度工作", mins: 45 }
+            ],
+            createdAt: Date.now(),
+            source: "builtin"
+          }
+        ];
+      },
+
+      ensureTaskIds(tasks) {
+        for (const t of tasks) {
+          if (!t.id) t.id = Utils.uid();
+          if (typeof t.emoji !== "string") t.emoji = "✨";
+          if (typeof t.name !== "string") t.name = "新环节";
+          t.mins = Utils.clampInt(t.mins, 1, 999);
+        }
+        return tasks;
+      },
+
+      load() {
+        try {
+          const tasksRaw = JSON.parse(localStorage.getItem(this.keys.tasks));
+          const presetsRaw = JSON.parse(localStorage.getItem(this.keys.presets));
+          State.tasks = Array.isArray(tasksRaw) ? this.ensureTaskIds(tasksRaw) : this.defaultTasks();
+          State.presets = Array.isArray(presetsRaw) ? presetsRaw : this.defaultPresets();
+
+          // presets 内任务也补 id（兼容旧导入）
+          State.presets.forEach(p => {
+            if (Array.isArray(p.tasks)) this.ensureTaskIds(p.tasks);
+          });
+
+          State.currentPresetId = localStorage.getItem(this.keys.currentPreset) || null;
+
+          const chimeRaw = localStorage.getItem(this.keys.chimeMins);
+          State.chimeMins = Utils.clampInt(chimeRaw ?? "0", 0, 60);
+          if (![0, 15, 30, 60].includes(State.chimeMins)) State.chimeMins = 0;
+        } catch (e) {
+          console.warn("Storage load failed:", e);
+          State.tasks = this.defaultTasks();
+          State.presets = this.defaultPresets();
+          State.currentPresetId = null;
+          State.chimeMins = 0;
+        }
+      },
+
+      saveTasks() {
+        localStorage.setItem(this.keys.tasks, JSON.stringify(State.tasks));
+      },
+      savePresets() {
+        localStorage.setItem(this.keys.presets, JSON.stringify(State.presets));
+      },
+      saveCurrentPreset() {
+        if (State.currentPresetId) localStorage.setItem(this.keys.currentPreset, State.currentPresetId);
+        else localStorage.removeItem(this.keys.currentPreset);
+      },
+      saveChime() {
+        localStorage.setItem(this.keys.chimeMins, String(State.chimeMins));
+      }
+    };
+
+    // ==================== Emoji auto width ====================
+    const EmojiSizer = {
+      // 给 emoji input 按内容自适应宽度（支持多个 emoji / ZWJ 序列）
+      fit(inputEl) {
+        if (!inputEl) return;
+        const text = inputEl.value || "";
+        DOM.emojiMeasure.textContent = text;
+
+        // 基于测量 span 的宽度来设置 input width
+        const measured = DOM.emojiMeasure.getBoundingClientRect().width;
+        const padding = 22; // 左右 padding + 一点余量
+        const min = 52;
+        const max = 180;
+        const w = Math.max(min, Math.min(max, Math.ceil(measured + padding)));
+        inputEl.style.width = w + "px";
+      },
+      fitAll() {
+        DOM.taskList.querySelectorAll("input.task-input-emoji").forEach(el => this.fit(el));
+      }
+    };
+
+    // ==================== UI ====================
+    const UI = {
+      toast(message, type = "success") {
+        DOM.toast.textContent = message;
+        DOM.toast.classList.remove("success", "error", "show");
+        DOM.toast.classList.add(type === "error" ? "error" : "success", "show");
+        window.setTimeout(() => DOM.toast.classList.remove("show"), 2500);
+      },
+
+      showPage(page) {
+        DOM.setupArea.style.display = page === "setup" ? "block" : "none";
+        DOM.runningArea.style.display = page === "running" ? "block" : "none";
+        DOM.logArea.style.display = page === "log" ? "block" : "none";
+      },
+
+      updatePanelTools() {
+        // flash count
+        const count = State.flashes.length;
+        if (DOM.flashChip) DOM.flashChip.textContent = `${count} 条`;
+
+        // chime state
+        const map = { 0: "关闭", 15: "15m", 30: "30m", 60: "60m" };
+        const label = map[State.chimeMins] ?? "关闭";
+        if (DOM.chimeChip) DOM.chimeChip.textContent = label;
+        if (DOM.chimeBtn) DOM.chimeBtn.classList.toggle("active", State.chimeMins > 0);
+      },
+
+      renderPresets() {
+        DOM.presetList.replaceChildren();
+
+        for (const p of State.presets) {
+          const item = document.createElement("div");
+          item.className = "preset-item" + (State.currentPresetId === p.id ? " active" : "");
+          item.dataset.presetId = p.id;
+
+          const info = document.createElement("div");
+          info.className = "preset-info";
+
+          const name = document.createElement("span");
+          name.className = "preset-name";
+          name.textContent = p.name;
+
+          if (p.source === "imported") {
+            const badge = document.createElement("span");
+            badge.className = "preset-badge";
+            badge.textContent = "导入";
+            name.appendChild(badge);
+          }
+
+          const meta = document.createElement("span");
+          meta.className = "preset-meta";
+          const total = (p.tasks || []).reduce((a, t) => a + (Number(t.mins) || 0), 0);
+          meta.textContent = `${(p.tasks || []).length} 步骤 · ${total} 分钟`;
+
+          info.appendChild(name);
+          info.appendChild(meta);
+
+          const actions = document.createElement("div");
+          actions.className = "preset-actions";
+
+          const loadBtn = document.createElement("button");
+          loadBtn.className = "btn-icon";
+          loadBtn.dataset.action = "load-preset";
+          loadBtn.dataset.id = p.id;
+          loadBtn.title = "加载";
+          loadBtn.innerHTML = `<svg class="icon" style="color:var(--accent-success)"><use href="#icon-upload"></use></svg>`;
+
+          const delBtn = document.createElement("button");
+          delBtn.className = "btn-icon";
+          delBtn.dataset.action = "delete-preset";
+          delBtn.dataset.id = p.id;
+          delBtn.title = "删除";
+          delBtn.innerHTML = `<svg class="icon" style="color:var(--accent-danger)"><use href="#icon-delete"></use></svg>`;
+
+          actions.appendChild(loadBtn);
+          actions.appendChild(delBtn);
+
+          item.appendChild(info);
+          item.appendChild(actions);
+
+          DOM.presetList.appendChild(item);
+        }
+      },
+
+      renderTasks() {
+        DOM.taskList.replaceChildren();
+
+        for (const t of State.tasks) {
+          const row = document.createElement("div");
+          row.className = "task-item";
+          row.dataset.taskId = t.id;
+
+          const handle = document.createElement("div");
+          handle.className = "task-handle";
+          handle.innerHTML = `<svg class="icon"><use href="#icon-drag"></use></svg>`;
+
+          const emojiInput = document.createElement("input");
+          emojiInput.className = "input task-input-emoji";
+          emojiInput.type = "text";
+          emojiInput.inputMode = "text";
+          emojiInput.autocomplete = "off";
+          emojiInput.spellcheck = false;
+          emojiInput.value = t.emoji;
+          emojiInput.dataset.field = "emoji";
+
+          const nameInput = document.createElement("input");
+          nameInput.className = "input";
+          nameInput.type = "text";
+          nameInput.value = t.name;
+          nameInput.dataset.field = "name";
+
+          const minsInput = document.createElement("input");
+          minsInput.className = "input task-input-mins";
+          minsInput.type = "number";
+          minsInput.min = "1";
+          minsInput.value = String(t.mins);
+          minsInput.dataset.field = "mins";
+
+          const removeBtn = document.createElement("button");
+          removeBtn.className = "btn-icon";
+          removeBtn.dataset.action = "remove-task";
+          removeBtn.dataset.id = t.id;
+          removeBtn.innerHTML = `<svg class="icon" style="color:var(--accent-danger)"><use href="#icon-close"></use></svg>`;
+
+          row.appendChild(handle);
+          row.appendChild(emojiInput);
+          row.appendChild(nameInput);
+          row.appendChild(minsInput);
+          row.appendChild(removeBtn);
+
+          DOM.taskList.appendChild(row);
+        }
+
+        // Sortable
+        if (DOM.taskList._sortable) DOM.taskList._sortable.destroy();
+        DOM.taskList._sortable = new Sortable(DOM.taskList, {
+          handle: ".task-handle",
+          animation: 200,
+          ghostClass: "sortable-ghost",
+          onEnd: () => {
+            const byId = new Map(State.tasks.map(t => [t.id, t]));
+            const newOrder = Array.from(DOM.taskList.children)
+              .map(el => byId.get(el.dataset.taskId))
+              .filter(Boolean);
+            State.tasks = newOrder;
+            Storage.saveTasks();
+            UI.renderTasks(); // 重渲染以保证一致性
+          }
+        });
+
+        // emoji input auto width
+        EmojiSizer.fitAll();
+      },
+
+      renderRunning() {
+        const task = State.tasks[State.currentTaskIndex];
+        if (!task) return;
+
+        DOM.displayEmoji.textContent = task.emoji;
+        DOM.displayName.textContent = task.name;
+
+        this.updateTimer();
+        this.updateETA();
+        this.renderProgress();
+        this.renderSidePanel();
+        this.updatePanelTools();
+      },
+
+      updateTimer() {
+        const isOT = State.isOvertime;
+        const secs = isOT ? State.overtimeSeconds : State.timeLeft;
+
+        const m = Math.floor(secs / 60);
+        const s = secs % 60;
+        const prefix = isOT ? "+" : "";
+
+        DOM.displayTime.textContent = `${prefix}${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+        DOM.displayTime.classList.toggle("overtime", isOT);
+        DOM.overtimeLabel.classList.toggle("show", isOT);
+        DOM.flowIndicator.classList.toggle("show", isOT);
+        DOM.forgotBtn.classList.toggle("show", isOT);
+      },
+
+      updateETA() {
+        DOM.etaProgress.textContent = `${State.currentTaskIndex + 1}/${State.tasks.length}`;
+
+        let remainingSecs = State.isOvertime ? 0 : State.timeLeft;
+        for (let i = State.currentTaskIndex + 1; i < State.tasks.length; i++) {
+          remainingSecs += (State.tasks[i].mins || 0) * 60;
+        }
+
+        const mins = Math.ceil(remainingSecs / 60);
+        DOM.etaRemaining.textContent = mins > 0 ? `${mins}分钟` : "即将完成";
+
+        const finishTime = new Date(Date.now() + remainingSecs * 1000);
+        DOM.etaFinish.textContent = finishTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      },
+
+      renderProgress() {
+        DOM.progressTrack.replaceChildren();
+
+        const totalMins = State.tasks.reduce((a, t) => a + (t.mins || 0), 0) || 1;
+
+        State.tasks.forEach((t, i) => {
+          const flex = (t.mins || 1) / totalMins;
+
+          let status = "future";
+          let badge = "待完成";
+          if (i < State.currentTaskIndex) { status = "completed"; badge = "已完成"; }
+          else if (i === State.currentTaskIndex) {
+            status = State.isOvertime ? "current overtime" : "current";
+            badge = State.isOvertime ? "心流中" : "进行中";
+          }
+
+          const seg = document.createElement("div");
+          seg.className = `progress-segment ${status}`;
+          seg.style.setProperty("--segment-flex", String(flex));
+          seg.dataset.index = String(i);
+
+          const emoji = document.createElement("span");
+          emoji.className = "segment-emoji";
+          emoji.textContent = t.emoji;
+
+          seg.appendChild(emoji);
+
+          if (i === State.currentTaskIndex) {
+            const fill = document.createElement("div");
+            fill.className = "segment-fill";
+            fill.id = "segment-fill";
+            seg.appendChild(fill);
+          }
+
+          const tooltip = document.createElement("div");
+          tooltip.className = "segment-tooltip";
+
+          const title = document.createElement("div");
+          title.className = "tooltip-title";
+          title.textContent = `${t.emoji} ${t.name}`;
+
+          const time = document.createElement("div");
+          time.className = "tooltip-time";
+          time.textContent = `计划 ${t.mins} 分钟`;
+
+          const badgeEl = document.createElement("div");
+          badgeEl.className = `tooltip-badge ${status.split(" ")[0]}`;
+          badgeEl.textContent = badge;
+
+          tooltip.appendChild(title);
+          tooltip.appendChild(time);
+          tooltip.appendChild(badgeEl);
+
+          seg.appendChild(tooltip);
+
+          DOM.progressTrack.appendChild(seg);
+        });
+
+        this.updateProgress();
+      },
+
+      updateProgress() {
+        const fill = document.getElementById("segment-fill");
+
+        if (fill && !State.isOvertime) {
+          const task = State.tasks[State.currentTaskIndex];
+          const total = (task?.mins || 1) * 60;
+          const elapsed = Math.max(0, total - State.timeLeft);
+          fill.style.width = `${Math.min((elapsed / total) * 100, 100)}%`;
+        } else if (fill) {
+          fill.style.width = "100%";
+        }
+
+        const totalMins = State.tasks.reduce((a, t) => a + (t.mins || 0), 0) || 1;
+        let completed = 0;
+
+        for (let i = 0; i < State.currentTaskIndex; i++) completed += (State.tasks[i].mins || 0);
+
+        const current = State.tasks[State.currentTaskIndex]?.mins || 0;
+        const elapsedMins = State.isOvertime ? current : (current - State.timeLeft / 60);
+        completed += Math.max(0, elapsedMins);
+
+        DOM.progressPercent.textContent = `${Math.round((completed / totalMins) * 100)}%`;
+      },
+
+      renderSidePanel() {
+        const active = State.tasks[State.currentTaskIndex];
+        DOM.activeTaskSlot.replaceChildren();
+        DOM.futureTaskList.replaceChildren();
+
+        if (!active) return;
+
+        const activeRow = document.createElement("div");
+        activeRow.className = "side-task active";
+
+        const aEmoji = document.createElement("span");
+        aEmoji.className = "side-task-emoji";
+        aEmoji.textContent = active.emoji;
+
+        const aName = document.createElement("span");
+        aName.className = "side-task-name";
+        aName.textContent = active.name;
+
+        const aEdit = document.createElement("button");
+        aEdit.className = "btn-icon";
+        aEdit.dataset.action = "edit-task";
+        aEdit.dataset.index = String(State.currentTaskIndex);
+        aEdit.innerHTML = `<svg class="icon"><use href="#icon-edit"></use></svg>`;
+
+        activeRow.appendChild(aEmoji);
+        activeRow.appendChild(aName);
+        activeRow.appendChild(aEdit);
+        DOM.activeTaskSlot.appendChild(activeRow);
+
+        const futures = State.tasks.slice(State.currentTaskIndex + 1);
+        if (futures.length === 0) {
+          const last = document.createElement("div");
+          last.style.cssText = "color:var(--text-muted);padding:var(--space-md);font-size:0.9rem;";
+          last.textContent = "最后一个步骤了 🎉";
+          DOM.futureTaskList.appendChild(last);
+          return;
+        }
+
+        for (let i = 0; i < futures.length; i++) {
+          const t = futures[i];
+          const realIdx = State.currentTaskIndex + 1 + i;
+
+          const row = document.createElement("div");
+          row.className = "side-task";
+          row.dataset.taskId = t.id;
+          row.dataset.realIndex = String(realIdx);
+
+          const handle = document.createElement("div");
+          handle.className = "side-task-handle";
+          handle.innerHTML = `<svg class="icon"><use href="#icon-drag"></use></svg>`;
+
+          const e = document.createElement("span");
+          e.className = "side-task-emoji";
+          e.textContent = t.emoji;
+
+          const n = document.createElement("span");
+          n.className = "side-task-name";
+          n.textContent = t.name;
+
+          const edit = document.createElement("button");
+          edit.className = "btn-icon";
+          edit.dataset.action = "edit-task";
+          edit.dataset.index = String(realIdx);
+          edit.innerHTML = `<svg class="icon"><use href="#icon-edit"></use></svg>`;
+
+          row.appendChild(handle);
+          row.appendChild(e);
+          row.appendChild(n);
+          row.appendChild(edit);
+
+          DOM.futureTaskList.appendChild(row);
+        }
+
+        if (DOM.futureTaskList._sortable) DOM.futureTaskList._sortable.destroy();
+        DOM.futureTaskList._sortable = new Sortable(DOM.futureTaskList, {
+          handle: ".side-task-handle",
+          animation: 200,
+          ghostClass: "sortable-ghost",
+          onEnd: () => {
+            const completed = State.tasks.slice(0, State.currentTaskIndex + 1);
+            const byId = new Map(State.tasks.map(t => [t.id, t]));
+            const newFutures = Array.from(DOM.futureTaskList.querySelectorAll(".side-task"))
+              .map(el => byId.get(el.dataset.taskId))
+              .filter(Boolean);
+
+            State.tasks = [...completed, ...newFutures];
+            Storage.saveTasks();
+
+            UI.renderProgress();
+            UI.renderSidePanel();
+            UI.updateETA();
+          }
+        });
+      },
+
+      renderLog() {
+        let md = `### 📅 Routine 执行日志 (${new Date().toLocaleDateString()})\n\n`;
+
+        if (State.logMode === "table") {
+          md += `| 状态 | 环节 | 开始 | 结束 | 计划 | 实际 | 超时 | 暂停 | 分心 |\n`;
+          md += `| :--: | :-- | :--: | :--: | :--: | :--: | :--: | :--: | :--: |\n`;
+
+          State.logs.forEach(l => {
+            let status = "✅";
+            if (l.aborted) status = "⏹️";
+            else if (l.distracted) status = "😅";
+            else if (l.overtime) status = "🌊";
+
+            md += `| ${status} | ${l.emoji} ${l.name} | ${l.start} | ${l.end || "-"} | ${l.planned}m | ${l.actual ?? "-"}m | ${l.overtimeMins > 0 ? "+" + l.overtimeMins + "m" : "-"} | ${l.pauses > 0 ? l.pauses + "次" : "-"} | ${l.distracted ? l.distractedMins + "m" : "-"} |\n`;
+          });
+        } else {
+          State.logs.forEach((l, i) => {
+            let status = "✅";
+            if (l.aborted) status = "⏹️";
+            else if (l.distracted) status = "😅";
+            else if (l.overtime) status = "🌊";
+
+            // 时间戳 + 事项 + 记录
+            md += `${i + 1}. ${status} ${l.start} **${l.emoji} ${l.name}**\n`;
+            md += `   - 结束: ${l.end || "-"} | 计划: ${l.planned}m | 实际: ${l.actual ?? "-"}m\n`;
+            if (l.pauses > 0) md += `   - 暂停: ${l.pauses}次\n`;
+            if (l.distracted) md += `   - 分心: ${l.distractedMins}m\n`;
+            if (l.overtime) md += `   - 心流超时: +${l.overtimeMins}m\n`;
+            if (l.aborted) md += `   - 状态: 已中止\n`;
+            md += `\n`;
+          });
+        }
+
+        // flashes section (only when exists)
+        if (State.flashes.length > 0) {
+          md += `\n---\n### 💭 闪念记录\n`;
+          State.flashes.forEach((f, i) => {
+            const taskLabel = f.task ? `（${f.task}）` : "";
+            md += `- ${f.time} ${taskLabel} ${f.text}\n`;
+          });
+        }
+
+        const totalPlanned = State.logs.reduce((a, l) => a + (l.planned || 0), 0);
+        const totalActual = State.logs.reduce((a, l) => a + (Number(l.actual) || 0), 0);
+        const flowCount = State.logs.filter(l => l.overtime && !l.distracted).length;
+        const distractCount = State.logs.filter(l => l.distracted).length;
+
+        md += `\n---\n**📊 统计**\n`;
+        md += `- 完成: ${State.logs.length} 步骤\n`;
+        md += `- 时间: 计划 ${totalPlanned}m / 实际 ${Math.round(totalActual)}m\n`;
+        if (flowCount > 0) md += `- 🌊 心流: ${flowCount} 次\n`;
+        if (distractCount > 0) md += `- 😅 分心: ${distractCount} 次\n`;
+
+        DOM.logContent.textContent = md;
+      }
+    };
+
+    // ==================== Audio ====================
+    const Audio = {
+      _ctx: null,
+      ensure() {
+        try {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (!AudioContext) return null;
+          if (!this._ctx) this._ctx = new AudioContext();
+          if (this._ctx.state === "suspended") this._ctx.resume();
+          return this._ctx;
+        } catch (e) {
+          console.error("Audio init failed:", e);
+          return null;
+        }
+      },
+
+      // 完成/切换提示音（保留你原来的双音，但稍微复用 ctx）
+      play() {
+        const ctx = this.ensure();
+        if (!ctx) return;
+
+        try {
+          const playTone = (freq, startTime, duration) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const filter = ctx.createBiquadFilter();
+
+            osc.type = "sine";
+            osc.frequency.value = freq;
+
+            filter.type = "lowpass";
+            filter.frequency.value = 2000;
+
+            osc.connect(gain);
+            gain.connect(filter);
+            filter.connect(ctx.destination);
+
+            const now = startTime;
+            gain.gain.setValueAtTime(0, now);
+            gain.gain.linearRampToValueAtTime(0.18, now + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+            osc.start(now);
+            osc.stop(now + duration);
+          };
+
+          playTone(587.33, ctx.currentTime, 0.8);
+          playTone(493.88, ctx.currentTime + 0.6, 0.8);
+        } catch (e) {
+          console.error("Audio Playback Failed:", e);
+        }
+      },
+
+      // 柔和钟声：用三组泛音 + 低通 + 轻微抖动，避免刺耳
+      playChime() {
+        const ctx = this.ensure();
+        if (!ctx) return;
+
+        try {
+          const now = ctx.currentTime;
+          const duration = 10.0;
+          const baseFreq = 432;
+
+          // 主增益：稍微快速的 Attack，模拟“肉感”打击
+          const master = ctx.createGain();
+          master.gain.setValueAtTime(0, now);
+          // 0.04s 是关键：比金属敲击(0.01)慢，比风琴(0.5)快，这是“包布木槌”的时间
+          master.gain.linearRampToValueAtTime(0.5, now + 0.04);
+          master.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+          // 关键：使用 Bandpass（带通）代替 Lowpass，制造“空腔共鸣”
+          const bandpass = ctx.createBiquadFilter();
+          bandpass.type = "bandpass";
+          bandpass.frequency.setValueAtTime(baseFreq * 1.5, now); // 聚焦在核心共鸣区
+          bandpass.Q.setValueAtTime(0.5, now); // 宽泛的过滤，保持自然
+
+          master.connect(bandpass);
+          bandpass.connect(ctx.destination);
+
+          // 重新构建：1个重低音基频 + 2个微差共振对 + 1个瞬态打击音
+          const components = [
+            { f: baseFreq, g: 0.7, lfoF: 0.2, w: 0.1 },        // 核心基音
+            { f: baseFreq * 1.003, g: 0.4, lfoF: 0.5, w: 0.2 }, // 相位对：制造“嗡嗡”的空气晃动
+            { f: baseFreq * 0.5, g: 0.3, lfoF: 0.1, w: 0.05 },  // 底座音：增加厚重感
+            { f: baseFreq * 2.41, g: 0.1, lfoF: 1.5, w: 0.02 }  // 唯一的高位分量：增加辨识度
+          ];
+
+          components.forEach((p) => {
+            const osc = ctx.createOscillator();
+            const g = ctx.createGain();
+
+            // 振幅抖动（Wobble）
+            const lfo = ctx.createOscillator();
+            const lfoGain = ctx.createGain();
+            lfo.frequency.setValueAtTime(p.lfoF, now);
+            lfoGain.gain.setValueAtTime(p.w, now);
+            lfo.connect(lfoGain);
+            lfoGain.connect(g.gain);
+
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(p.f, now);
+
+            g.gain.setValueAtTime(0, now);
+            // 模拟钵体被敲击后能量的迅速爆发
+            g.gain.linearRampToValueAtTime(p.g, now + 0.04);
+            g.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+            osc.connect(g);
+            g.connect(master);
+
+            osc.start(now);
+            lfo.start(now);
+            osc.stop(now + duration);
+            lfo.stop(now + duration);
+          });
+
+          // --- 核心新增：模拟“木槌撞击”的瞬态低频 ---
+          const thud = ctx.createOscillator();
+          const thudGain = ctx.createGain();
+          thud.type = "sine";
+          thud.frequency.setValueAtTime(150, now); // 低沉的撞击声
+          thud.frequency.exponentialRampToValueAtTime(50, now + 0.1); // 频率迅速下滑
+
+          thudGain.gain.setValueAtTime(0.3, now);
+          thudGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.2); // 极短的瞬间
+
+          thud.connect(thudGain);
+          thudGain.connect(ctx.destination); // 绕过 Master 滤镜，保持直接感
+          thud.start(now);
+          thud.stop(now + 0.2);
+
+        } catch (e) {
+          console.error("Singing Bowl Playback Failed:", e);
+        }
+      }
+    };
+
+    // ==================== Chime (active-time based) ====================
+    const Chime = {
+      cycle() {
+        const order = [0, 15, 30, 60];
+        const idx = order.indexOf(State.chimeMins);
+        State.chimeMins = order[(idx + 1 + order.length) % order.length];
+        Storage.saveChime();
+
+        // when running: schedule next chime from now (active time)
+        if (State.isRunning) {
+          if (State.chimeMins > 0) {
+            State.nextChimeAtActiveSeconds = State.routineActiveSeconds + State.chimeMins * 60;
+            Audio.playChime();
+            UI.toast(`敲钟已开启：每 ${State.chimeMins} 分钟一次`);
+          } else {
+            State.nextChimeAtActiveSeconds = null;
+            UI.toast("敲钟已关闭", "error");
+          }
+        } else {
+          UI.toast(State.chimeMins > 0 ? `敲钟：${State.chimeMins} 分钟` : "敲钟：关闭");
+        }
+
+        UI.updatePanelTools();
+      },
+
+      tick(nowMs) {
+        if (!State.isRunning) return;
+        if (State.isPaused) return;
+        if (!State.chimeMins || State.chimeMins <= 0) return;
+        if (!Number.isFinite(State.nextChimeAtActiveSeconds)) return;
+
+        // update active seconds
+        if (State.lastActiveUpdate) {
+          const dt = Math.max(0, (nowMs - State.lastActiveUpdate) / 1000);
+          State.routineActiveSeconds += dt;
+          State.lastActiveUpdate = nowMs;
+        } else {
+          State.lastActiveUpdate = nowMs;
+        }
+
+        const intervalSec = State.chimeMins * 60;
+        let guard = 0;
+        while (State.routineActiveSeconds >= State.nextChimeAtActiveSeconds && guard++ < 5) {
+          Audio.playChime();
+          State.nextChimeAtActiveSeconds += intervalSec;
+        }
+      },
+
+      syncActiveOnPauseToggle(isPausing) {
+        const now = Date.now();
+        if (isPausing) {
+          // accumulate before we stop ticking
+          if (State.lastActiveUpdate) {
+            State.routineActiveSeconds += Math.max(0, (now - State.lastActiveUpdate) / 1000);
+          }
+          State.lastActiveUpdate = now;
+        } else {
+          State.lastActiveUpdate = now;
+        }
+      },
+
+      initForRoutineStart() {
+        State.routineActiveSeconds = 0;
+        State.lastActiveUpdate = Date.now();
+        if (State.chimeMins > 0) {
+          State.nextChimeAtActiveSeconds = State.chimeMins * 60;
+        } else {
+          State.nextChimeAtActiveSeconds = null;
+        }
+        UI.updatePanelTools();
+      },
+
+      endRoutine() {
+        State.lastActiveUpdate = null;
+        State.nextChimeAtActiveSeconds = null;
+      }
+    };
+
+    // ==================== Timer (timestamp-based) ====================
+    const Timer = {
+      intervalId: null,
+
+      start() {
+        this.stop();
+        this.tick(); // immediate
+        this.intervalId = window.setInterval(() => this.tick(), 1000);
+      },
+
+      tick() {
+        if (!State.isRunning) return;
+        if (State.isPaused) return;
+
+        const task = State.tasks[State.currentTaskIndex];
+        if (!task) return;
+
+        const startTime = State.taskStats.startTime;
+        if (!startTime) return;
+
+        const now = Date.now();
+
+        // chime tick based on active routine time
+        Chime.tick(now);
+
+        const totalElapsed = (now - startTime) / 1000;
+        const activeElapsed = totalElapsed - (State.taskStats.pauseDuration || 0);
+
+        const taskTotalSeconds = (task.mins || 1) * 60;
+        const remaining = taskTotalSeconds - activeElapsed;
+
+        if (remaining > 0) {
+          State.timeLeft = Math.ceil(remaining);
+          State.isOvertime = false;
+        } else {
+          if (!State.isOvertime) {
+            State.isOvertime = true;
+            Audio.play();
+          }
+          State.overtimeSeconds = Math.floor(Math.abs(remaining));
+        }
+
+        UI.updateTimer();
+        UI.updateProgress();
+        UI.updateETA();
+      },
+
+      stop() {
+        if (this.intervalId) {
+          clearInterval(this.intervalId);
+          this.intervalId = null;
+        }
+      }
+    };
+
+    // ==================== App ====================
+    const App = {
+      startRoutine() {
+        if (!State.tasks.length) {
+          UI.toast("请先添加至少一个步骤", "error");
+          return;
+        }
+
+        State.currentTaskIndex = 0;
+        State.logs = [];
+        State.flashes = [];
+        State.routineStartTime = new Date();
+        State.isRunning = true;
+
+        Chime.initForRoutineStart();
+
+        UI.showPage("running");
+        this.runTask();
+      },
+
+      runTask() {
+        if (State.currentTaskIndex >= State.tasks.length) {
+          this.finishRoutine();
+          return;
+        }
+
+        const task = State.tasks[State.currentTaskIndex];
+
+        State.timeLeft = (task.mins || 1) * 60;
+        State.isPaused = false;
+        State.isOvertime = false;
+        State.overtimeSeconds = 0;
+
+        State.taskStats = {
+          pauses: 0,
+          pauseDuration: 0,
+          pauseStart: null,
+          startTime: Date.now()
+        };
+
+        DOM.statusMessage.textContent = "";
+        DOM.displayTime.classList.remove("distracted");
+        DOM.flowIndicator.innerHTML = "<span>🌊</span><span>心流模式 - 继续专注吧！</span>";
+        DOM.pauseBtn.textContent = "暂停";
+
+        State.logs.push({
+          emoji: task.emoji,
+          name: task.name,
+          planned: task.mins,
+          start: Utils.formatTime(new Date(State.taskStats.startTime))
+        });
+
+        UI.renderRunning();
+        Timer.start();
+      },
+
+      togglePause() {
+        // update chime active-time accumulator
+        Chime.syncActiveOnPauseToggle(!State.isPaused);
+
+        State.isPaused = !State.isPaused;
+
+        if (State.isPaused) {
+          State.taskStats.pauseStart = Date.now();
+          State.taskStats.pauses++;
+          DOM.pauseBtn.textContent = "继续";
+          DOM.statusMessage.textContent = "⏸ 计时暂停中";
+        } else {
+          if (State.taskStats.pauseStart) {
+            State.taskStats.pauseDuration += Math.round((Date.now() - State.taskStats.pauseStart) / 1000);
+            State.taskStats.pauseStart = null;
+          }
+          DOM.pauseBtn.textContent = "暂停";
+          DOM.statusMessage.textContent = "";
+          Timer.tick(); // resume immediate refresh
+        }
+      },
+
+      completeTask() {
+        const log = State.logs[State.currentTaskIndex];
+        const now = Date.now();
+
+        log.end = Utils.formatTime(new Date(now));
+        log.pauses = State.taskStats.pauses;
+        log.overtime = State.isOvertime;
+        log.overtimeMins = Math.round(State.overtimeSeconds / 60);
+
+        const actualSecs = Math.round((now - State.taskStats.startTime) / 1000) - (State.taskStats.pauseDuration || 0);
+        log.actual = Math.round((actualSecs / 60) * 10) / 10;
+
+        State.currentTaskIndex++;
+        Audio.play();
+        this.runTask();
+      },
+
+      applyDistraction(mins) {
+        const log = State.logs[State.currentTaskIndex];
+        log.distracted = true;
+        log.distractedMins = mins;
+
+        DOM.displayTime.classList.add("distracted");
+        DOM.flowIndicator.innerHTML = "<span>😅</span><span>已记录分心时间</span>";
+
+        UI.toast(`已记录：分心了约 ${mins} 分钟`);
+        window.setTimeout(() => this.completeTask(), 300);
+      },
+
+      stopRoutine() {
+        if (State.logs.length > 0) {
+          const log = State.logs[State.currentTaskIndex];
+          if (log && !log.end) {
+            const now = Date.now();
+            log.end = Utils.formatTime(new Date(now));
+            log.aborted = true;
+            log.pauses = State.taskStats.pauses;
+
+            const actualSecs = Math.round((now - State.taskStats.startTime) / 1000) - (State.taskStats.pauseDuration || 0);
+            log.actual = Math.round((actualSecs / 60) * 10) / 10;
+          }
+        }
+        this.finishRoutine();
+      },
+
+      finishRoutine() {
+        Timer.stop();
+        Chime.endRoutine();
+        State.isRunning = false;
+        UI.showPage("log");
+        UI.renderLog();
+      },
+
+      togglePanel() {
+        DOM.sidePanel.classList.toggle("open");
+        DOM.panelTrigger.classList.toggle("hidden");
+        UI.renderSidePanel();
+        UI.updatePanelTools();
+      },
+
+      editTask(index) {
+        const task = State.tasks[index];
+        if (!task) return;
+
+        const name = prompt("修改环节名称:", task.name);
+        const minsStr = prompt("修改计划时长(分钟):", String(task.mins));
+
+        if (name !== null && name.trim() !== "") task.name = name.trim();
+        if (minsStr !== null && minsStr.trim() !== "") task.mins = Utils.clampInt(minsStr, 1, 999);
+
+        Storage.saveTasks();
+
+        // 若正在运行且编辑的是当前任务：不直接覆盖 timeLeft，让 Timer 统一计算
+        if (State.isRunning && index === State.currentTaskIndex) {
+          DOM.displayName.textContent = task.name;
+          Timer.tick();
+        }
+
+        UI.renderTasks();      // 同步 setup 页
+        UI.renderSidePanel();  // 同步侧边栏
+        UI.renderProgress();
+        UI.updateETA();
+      },
+
+      updateTaskById(taskId, field, value) {
+        const t = State.tasks.find(x => x.id === taskId);
+        if (!t) return;
+
+        if (field === "mins") {
+          t.mins = Utils.clampInt(value, 1, 999);
+        } else if (field === "emoji") {
+          t.emoji = String(value);
+        } else if (field === "name") {
+          t.name = String(value);
+        }
+
+        Storage.saveTasks();
+      },
+
+      addTask() {
+        State.tasks.push({ id: Utils.uid(), emoji: "✨", name: "新环节", mins: 5 });
+        Storage.saveTasks();
+        UI.renderTasks();
+      },
+
+      removeTaskById(id) {
+        State.tasks = State.tasks.filter(t => t.id !== id);
+        Storage.saveTasks();
+        UI.renderTasks();
+      },
+
+      exportConfig() {
+        const preset = State.presets.find(p => p.id === State.currentPresetId);
+        const config = {
+          version: "1.0",
+          exportedAt: new Date().toISOString(),
+          name: preset?.name || "未命名流程",
+          tasks: Utils.deepClone(State.tasks)
+        };
+
+        const blob = new Blob([JSON.stringify(config, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `flow-routine-${new Date().toLocaleDateString().replace(/\//g, "-")}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        UI.toast("配置已导出！");
+      },
+
+      importConfig(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const config = JSON.parse(e.target.result);
+            if (!config.tasks || !Array.isArray(config.tasks)) throw new Error("无效的配置文件");
+
+            // 确保导入任务有 id
+            Storage.ensureTaskIds(config.tasks);
+
+            let name = config.name || file.name.replace(/\.json$/i, "");
+            let counter = 1;
+            while (State.presets.some(p => p.name === name)) {
+              name = `${config.name || "导入的流程"} (${counter++})`;
+            }
+
+            const newPreset = {
+              id: "imported_" + Date.now(),
+              name,
+              tasks: Utils.deepClone(config.tasks),
+              createdAt: Date.now(),
+              source: "imported"
+            };
+
+            State.presets.push(newPreset);
+            State.tasks = Utils.deepClone(config.tasks);
+            State.currentPresetId = newPreset.id;
+
+            Storage.savePresets();
+            Storage.saveTasks();
+            Storage.saveCurrentPreset();
+
+            UI.renderPresets();
+            UI.renderTasks();
+            UI.toast(`已导入「${name}」`);
+          } catch (err) {
+            UI.toast("导入失败：" + err.message, "error");
+          }
+        };
+        reader.readAsText(file);
+      },
+
+      savePreset(name) {
+        const newPreset = {
+          id: "preset_" + Date.now(),
+          name,
+          tasks: Utils.deepClone(State.tasks),
+          createdAt: Date.now(),
+          source: "user"
+        };
+
+        State.presets.push(newPreset);
+        State.currentPresetId = newPreset.id;
+
+        Storage.savePresets();
+        Storage.saveCurrentPreset();
+        UI.renderPresets();
+        UI.toast(`预设「${name}」已保存！`);
+      },
+
+      loadPreset(id) {
+        const preset = State.presets.find(p => p.id === id);
+        if (!preset) return;
+
+        // 加载时深拷贝，避免引用串改
+        const tasks = Utils.deepClone(preset.tasks || []);
+        Storage.ensureTaskIds(tasks);
+
+        State.tasks = tasks;
+        State.currentPresetId = id;
+
+        Storage.saveTasks();
+        Storage.saveCurrentPreset();
+
+        UI.renderTasks();
+        UI.renderPresets();
+        UI.toast(`已加载「${preset.name}」`);
+      },
+
+      deletePreset(id) {
+        const preset = State.presets.find(p => p.id === id);
+        if (!preset) return;
+        if (!confirm(`确定要删除「${preset.name}」吗？`)) return;
+
+        State.presets = State.presets.filter(p => p.id !== id);
+        if (State.currentPresetId === id) State.currentPresetId = null;
+
+        Storage.savePresets();
+        Storage.saveCurrentPreset();
+        UI.renderPresets();
+        UI.toast("预设已删除", "error");
+      },
+
+      openFlash() {
+        if (!State.isRunning) {
+          UI.toast("请先开始执行再记录闪念", "error");
+          return;
+        }
+        DOM.flashModal.classList.add("show");
+        DOM.flashInput.value = "";
+        DOM.flashInput.focus();
+      },
+
+      saveFlash() {
+        const text = Utils.safeTrim(DOM.flashInput.value);
+        if (!text) {
+          UI.toast("请输入内容", "error");
+          return;
+        }
+
+        const task = State.tasks[State.currentTaskIndex];
+        const taskLabel = task ? `${task.emoji} ${task.name}` : "";
+
+        State.flashes.push({
+          time: Utils.formatTime(new Date()),
+          task: taskLabel,
+          text
+        });
+
+        DOM.flashModal.classList.remove("show");
+        UI.updatePanelTools();
+        UI.toast("闪念已记录 ✅");
+      }
+    };
+
+    // ==================== Events ====================
+    function setupEvents() {
+      document.addEventListener("click", (e) => {
+        const actionEl = e.target.closest("[data-action]");
+        const action = actionEl?.dataset.action;
+        if (!action) return;
+
+        switch (action) {
+          case "start": App.startRoutine(); break;
+          case "add-task": App.addTask(); break;
+          case "remove-task": App.removeTaskById(actionEl.dataset.id); break;
+
+          case "export": App.exportConfig(); break;
+          case "import": DOM.fileInput.click(); break;
+
+          case "save-preset":
+            DOM.saveModal.classList.add("show");
+            DOM.presetNameInput.value = "";
+            DOM.presetNameInput.focus();
+            break;
+          case "cancel-save":
+            DOM.saveModal.classList.remove("show");
+            break;
+          case "confirm-save": {
+            const name = DOM.presetNameInput.value.trim();
+            if (!name) { UI.toast("请输入名称", "error"); break; }
+            App.savePreset(name);
+            DOM.saveModal.classList.remove("show");
+            break;
+          }
+
+          case "load-preset":
+            App.loadPreset(actionEl.dataset.id);
+            break;
+          case "delete-preset":
+            App.deletePreset(actionEl.dataset.id);
+            break;
+
+          case "pause": App.togglePause(); break;
+          case "complete": App.completeTask(); break;
+
+          case "forgot":
+            DOM.distractionModal.classList.add("show");
+            DOM.customDistractionInput.value = "";
+            DOM.customDistractionInput.focus();
+            break;
+          case "cancel-distraction":
+            DOM.distractionModal.classList.remove("show");
+            break;
+          case "apply-custom-distraction": {
+            const mins = Utils.clampInt(DOM.customDistractionInput.value, 1, 999);
+            if (mins > 0) {
+              DOM.distractionModal.classList.remove("show");
+              App.applyDistraction(mins);
+            } else {
+              UI.toast("请输入有效的分钟数", "error");
+            }
+            break;
+          }
+
+          case "stop": App.stopRoutine(); break;
+          case "close-panel": App.togglePanel(); break;
+
+          case "edit-task":
+            App.editTask(Number.parseInt(actionEl.dataset.index, 10));
+            break;
+
+          case "copy-log":
+            navigator.clipboard.writeText(DOM.logContent.textContent);
+            UI.toast("已复制 Markdown 日志！");
+            break;
+
+          case "restart":
+            location.reload();
+            break;
+
+          // new: flash + chime
+          case "open-flash":
+            App.openFlash();
+            break;
+          case "cancel-flash":
+            DOM.flashModal.classList.remove("show");
+            break;
+          case "save-flash":
+            App.saveFlash();
+            break;
+          case "toggle-chime":
+            Chime.cycle();
+            break;
+        }
+      });
+
+      DOM.distractionGrid.addEventListener("click", (e) => {
+        const option = e.target.closest(".distraction-option");
+        if (!option) return;
+        DOM.distractionModal.classList.remove("show");
+        App.applyDistraction(Utils.clampInt(option.dataset.mins, 1, 999));
+      });
+
+      DOM.panelTrigger.addEventListener("click", () => App.togglePanel());
+
+      // 任务输入：用 input 实时写回，避免 change+index 的偶发错写
+      DOM.taskList.addEventListener("input", (e) => {
+        const input = e.target;
+        const field = input.dataset.field;
+        if (!field) return;
+
+        const row = input.closest(".task-item");
+        const taskId = row?.dataset.taskId;
+        if (!taskId) return;
+
+        App.updateTaskById(taskId, field, input.value);
+
+        if (field === "emoji") EmojiSizer.fit(input);
+      });
+
+      // mins：离开时再强制修正显示值（比如输入空/0）
+      DOM.taskList.addEventListener("change", (e) => {
+        const input = e.target;
+        if (input.dataset.field !== "mins") return;
+
+        const row = input.closest(".task-item");
+        const taskId = row?.dataset.taskId;
+        if (!taskId) return;
+
+        App.updateTaskById(taskId, "mins", input.value);
+        const t = State.tasks.find(x => x.id === taskId);
+        input.value = String(t?.mins ?? 1);
+      });
+
+      DOM.fileInput.addEventListener("change", (e) => {
+        if (e.target.files && e.target.files[0]) {
+          App.importConfig(e.target.files[0]);
+          e.target.value = "";
+        }
+      });
+
+      document.querySelectorAll(".tab-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          State.logMode = btn.dataset.tab;
+          UI.renderLog();
+        });
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          DOM.saveModal.classList.remove("show");
+          DOM.distractionModal.classList.remove("show");
+          DOM.flashModal.classList.remove("show");
+        }
+        if (e.key === "Enter" && DOM.saveModal.classList.contains("show")) {
+          document.querySelector('[data-action="confirm-save"]').click();
+        }
+        if (e.key === "Enter" && (e.metaKey || e.ctrlKey) && DOM.flashModal.classList.contains("show")) {
+          document.querySelector('[data-action="save-flash"]').click();
+        }
+      });
+
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden && State.isRunning && !State.isPaused) Timer.tick();
+      });
+    }
+
+    // ==================== Init ====================
+    function init() {
+      cacheDOM();
+      Storage.load();
+      UI.renderTasks();
+      UI.renderPresets();
+      UI.updatePanelTools();
+      setupEvents();
+    }
+    document.addEventListener("DOMContentLoaded", init);
+  </script>
+</body>
+
+
+</html>

@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Flow Timer v1.1</title>
+  <title>Flow Timer v1.2</title>
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌊</text></svg>">
 
@@ -1206,50 +1206,278 @@
         font-size: 2rem;
       }
 
+      #setup-area {
+        padding: var(--space-md);
+      }
+
+      .config-section {
+        padding: var(--space-md);
+      }
+
+      .config-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .config-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-sm);
+      }
+
+      .btn-config {
+        justify-content: center;
+        padding: var(--space-md);
+        font-size: 0.8rem;
+      }
+
+      .btn-config .icon {
+        display: none;
+      }
+
       .task-item {
-        grid-template-columns: 28px auto 1fr 60px 32px;
+        grid-template-columns: 28px 1fr 60px 32px;
         gap: var(--space-sm);
         padding: var(--space-sm);
       }
 
-      .task-emoji {
-        font-size: 5rem;
-      }
-
-      .task-name {
-        font-size: 1.8rem;
-      }
-
-      .timer-display {
-        font-size: 4rem;
-      }
-
-      .eta-bar {
-        flex-direction: column;
-        gap: var(--space-sm);
-        padding: var(--space-sm) var(--space-md);
-      }
-
-      .eta-divider {
+      .task-input-emoji {
         display: none;
       }
 
-      .control-buttons {
-        flex-direction: column;
-        align-items: center;
+      .task-emoji {
+        font-size: 4.5rem;
       }
 
-      .btn-control {
-        width: 200px;
+      .task-name {
+        font-size: 1.5rem;
+      }
+
+      .timer-display {
+        font-size: 3.5rem;
+        letter-spacing: -2px;
+      }
+
+      .eta-bar {
+        flex-direction: row;
+        gap: var(--space-md);
+        padding: var(--space-sm) var(--space-md);
+        width: auto;
+        max-width: 95%;
+      }
+
+      .eta-item {
+        flex-direction: column;
+        gap: 2px;
+        font-size: 0.75rem;
+      }
+
+      .eta-divider {
+        display: block;
+        height: 24px;
+      }
+
+      .main-display {
+        padding-top: 10vh;
+        padding-bottom: 180px;
+      }
+
+      /* Hide desktop control buttons on mobile */
+      .control-buttons {
+        display: none;
+      }
+
+      .forgot-btn {
+        display: none !important;
+      }
+
+      .stop-btn {
+        display: none;
+      }
+
+      /* Mobile bottom action bar */
+      .mobile-action-bar {
+        display: flex !important;
+      }
+
+      .progress-container {
+        bottom: 70px;
+        padding: var(--space-sm) var(--space-md) var(--space-md);
       }
 
       .progress-track {
-        height: 24px;
+        height: 22px;
+      }
+
+      .progress-header {
+        margin-bottom: var(--space-sm);
+        font-size: 0.8rem;
+      }
+
+      /* Mobile side panel - slide from bottom */
+      .panel-trigger {
+        display: none;
+      }
+
+      #side-panel {
+        top: auto;
+        bottom: -100%;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: 85vh;
+        border-left: none;
+        border-top: 1px solid var(--border-default);
+        border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+        padding-bottom: 100px;
+      }
+
+      #side-panel.open {
+        bottom: 0;
+        right: 0;
+      }
+
+      .panel-header {
+        position: sticky;
+        top: 0;
+        background: rgba(17, 24, 39, 0.98);
+        margin: calc(var(--space-lg) * -1);
+        margin-bottom: var(--space-md);
+        padding: var(--space-lg);
+        border-bottom: 1px solid var(--border-subtle);
+        z-index: 10;
+      }
+
+      /* Mobile panel overlay */
+      .panel-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 550;
+      }
+
+      .panel-overlay.show {
+        display: block;
       }
 
       .distraction-grid {
         grid-template-columns: repeat(2, 1fr);
       }
+
+      .modal {
+        width: 95%;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+
+      .modal-header {
+        font-size: 1.1rem;
+      }
+
+      #log-area {
+        padding: var(--space-md);
+      }
+
+      .log-header h2 {
+        font-size: 1.4rem;
+      }
+
+      .log-content {
+        font-size: 0.75rem;
+        padding: var(--space-md);
+      }
+
+      .tabs {
+        flex-direction: row;
+      }
+
+      .tab-btn {
+        padding: var(--space-sm) var(--space-md);
+        font-size: 0.85rem;
+      }
+    }
+
+    /* Mobile action bar */
+    .mobile-action-bar {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 70px;
+      background: rgba(17, 24, 39, 0.98);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border-default);
+      padding: var(--space-sm) var(--space-md);
+      padding-bottom: calc(var(--space-sm) + env(safe-area-inset-bottom, 0));
+      z-index: 200;
+      gap: var(--space-sm);
+    }
+
+    .mobile-action-btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: var(--space-sm);
+      background: transparent;
+      border: none;
+      border-radius: var(--radius-md);
+      color: var(--text-secondary);
+      font-size: 0.7rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .mobile-action-btn:active {
+      transform: scale(0.95);
+    }
+
+    .mobile-action-btn .icon {
+      width: 22px;
+      height: 22px;
+    }
+
+    .mobile-action-btn.primary {
+      background: linear-gradient(135deg, var(--accent-success), #059669);
+      color: white;
+      border-radius: var(--radius-lg);
+    }
+
+    .mobile-action-btn.warning {
+      background: linear-gradient(135deg, var(--accent-secondary), #d97706);
+      color: white;
+      border-radius: var(--radius-lg);
+    }
+
+    .mobile-action-btn.danger {
+      color: var(--accent-danger);
+    }
+
+    .mobile-action-btn.active {
+      color: var(--accent-primary-light);
+    }
+
+    .mobile-action-btn .badge {
+      position: absolute;
+      top: 2px;
+      right: 50%;
+      transform: translateX(12px);
+      min-width: 16px;
+      height: 16px;
+      padding: 0 4px;
+      background: var(--accent-danger);
+      border-radius: 8px;
+      font-size: 0.65rem;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     #file-input {
@@ -1323,6 +1551,24 @@
     </symbol>
     <symbol id="icon-clipboard" viewBox="0 0 24 24">
       <path d="M19 2h-4.18C14.4.84 13.3 0 12 0c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm7 18H5V4h2v3h10V4h2v16z" />
+    </symbol>
+    <symbol id="icon-check" viewBox="0 0 24 24">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+    </symbol>
+    <symbol id="icon-pause" viewBox="0 0 24 24">
+      <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+    </symbol>
+    <symbol id="icon-play" viewBox="0 0 24 24">
+      <path d="M8 5v14l11-7z" />
+    </symbol>
+    <symbol id="icon-menu" viewBox="0 0 24 24">
+      <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
+    </symbol>
+    <symbol id="icon-stop" viewBox="0 0 24 24">
+      <path d="M6 6h12v12H6z" />
+    </symbol>
+    <symbol id="icon-help" viewBox="0 0 24 24">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z" />
     </symbol>
   </svg>
 
@@ -1409,22 +1655,22 @@
               <button class="btn btn-config" data-action="export">
                 <svg class="icon">
                   <use href="#icon-download"></use>
-                </svg> 导出
+                </svg><span class="btn-text">导出</span>
               </button>
               <button class="btn btn-config" data-action="import">
                 <svg class="icon">
                   <use href="#icon-upload"></use>
-                </svg> 导入
+                </svg><span class="btn-text">导入文件</span>
               </button>
               <button class="btn btn-config" data-action="import-clipboard">
                 <svg class="icon">
                   <use href="#icon-clipboard"></use>
-                </svg> 粘贴导入
+                </svg><span class="btn-text">粘贴导入</span>
               </button>
               <button class="btn btn-config primary" data-action="save-preset">
                 <svg class="icon">
                   <use href="#icon-save"></use>
-                </svg> 存为预设
+                </svg><span class="btn-text">存为预设</span>
               </button>
             </div>
           </div>
@@ -1443,6 +1689,29 @@
 
   <!-- Running -->
   <div id="running-area">
+    <!-- Mobile panel overlay -->
+    <div class="panel-overlay" id="panel-overlay"></div>
+
+    <!-- Mobile bottom action bar -->
+    <div class="mobile-action-bar" id="mobile-action-bar">
+      <button class="mobile-action-btn" id="mobile-pause-btn" data-action="mobile-pause">
+        <svg class="icon" id="mobile-pause-icon"><use href="#icon-pause"></use></svg>
+        <span id="mobile-pause-label">暂停</span>
+      </button>
+      <button class="mobile-action-btn primary" data-action="complete">
+        <svg class="icon"><use href="#icon-check"></use></svg>
+        <span>完成</span>
+      </button>
+      <button class="mobile-action-btn" data-action="mobile-menu" style="position:relative">
+        <svg class="icon"><use href="#icon-menu"></use></svg>
+        <span>菜单</span>
+      </button>
+      <button class="mobile-action-btn danger" data-action="mobile-forgot" id="mobile-forgot-btn" style="display:none">
+        <svg class="icon"><use href="#icon-help"></use></svg>
+        <span>忘停了</span>
+      </button>
+    </div>
+
     <div class="eta-bar">
       <div class="eta-item"><span class="eta-label">进度</span><span class="eta-value" id="eta-progress">1/3</span></div>
       <div class="eta-divider"></div>
@@ -1500,6 +1769,19 @@
       <div id="active-task-slot"></div>
       <div class="panel-section-label">后续任务 (可拖拽)</div>
       <div id="future-task-list"></div>
+
+      <div class="panel-section-label">其他操作</div>
+      <button class="panel-tool-btn" data-action="stop" style="border-color: var(--accent-danger);">
+        <div class="panel-tool-left">
+          <svg class="icon" style="color:var(--accent-danger)">
+            <use href="#icon-stop"></use>
+          </svg>
+          <div style="display:flex;flex-direction:column;min-width:0;flex:1;align-items:center;justify-content:center">
+            <span class="panel-tool-title" style="color:var(--accent-danger)">中止执行</span>
+            <span class="panel-tool-sub">结束并导出日志</span>
+          </div>
+        </div>
+      </button>
     </div>
 
     <div class="main-display">
@@ -1660,6 +1942,14 @@
       DOM.toast = document.getElementById("toast");
 
       DOM.emojiMeasure = document.getElementById("emoji-measure");
+
+      // Mobile elements
+      DOM.mobileActionBar = document.getElementById("mobile-action-bar");
+      DOM.mobilePauseBtn = document.getElementById("mobile-pause-btn");
+      DOM.mobilePauseIcon = document.getElementById("mobile-pause-icon");
+      DOM.mobilePauseLabel = document.getElementById("mobile-pause-label");
+      DOM.mobileForgotBtn = document.getElementById("mobile-forgot-btn");
+      DOM.panelOverlay = document.getElementById("panel-overlay");
     }
 
     // ==================== Storage ====================
@@ -1959,6 +2249,25 @@
         DOM.overtimeLabel.classList.toggle("show", isOT);
         DOM.flowIndicator.classList.toggle("show", isOT);
         DOM.forgotBtn.classList.toggle("show", isOT);
+
+        // Update mobile forgot button visibility
+        if (DOM.mobileForgotBtn) {
+          DOM.mobileForgotBtn.style.display = isOT ? "flex" : "none";
+        }
+      },
+
+      updateMobilePauseBtn() {
+        if (!DOM.mobilePauseIcon || !DOM.mobilePauseLabel) return;
+        
+        if (State.isPaused) {
+          DOM.mobilePauseIcon.innerHTML = '<use href="#icon-play"></use>';
+          DOM.mobilePauseLabel.textContent = "继续";
+          DOM.mobilePauseBtn.classList.add("active");
+        } else {
+          DOM.mobilePauseIcon.innerHTML = '<use href="#icon-pause"></use>';
+          DOM.mobilePauseLabel.textContent = "暂停";
+          DOM.mobilePauseBtn.classList.remove("active");
+        }
       },
 
       updateETA() {
@@ -2559,6 +2868,9 @@
           DOM.statusMessage.textContent = "";
           Timer.tick(); // resume immediate refresh
         }
+
+        // Update mobile pause button
+        UI.updateMobilePauseBtn();
       },
 
       completeTask() {
@@ -2615,10 +2927,24 @@
       },
 
       togglePanel() {
-        DOM.sidePanel.classList.toggle("open");
+        const isOpen = DOM.sidePanel.classList.toggle("open");
         DOM.panelTrigger.classList.toggle("hidden");
+        
+        // Mobile overlay
+        if (DOM.panelOverlay) {
+          DOM.panelOverlay.classList.toggle("show", isOpen);
+        }
+        
         UI.renderSidePanel();
         UI.updatePanelTools();
+      },
+
+      closePanel() {
+        DOM.sidePanel.classList.remove("open");
+        DOM.panelTrigger.classList.remove("hidden");
+        if (DOM.panelOverlay) {
+          DOM.panelOverlay.classList.remove("show");
+        }
       },
 
       editTask(index) {
@@ -2951,7 +3277,15 @@
           }
 
           case "stop": App.stopRoutine(); break;
-          case "close-panel": App.togglePanel(); break;
+          case "close-panel": App.closePanel(); break;
+
+          // Mobile actions
+          case "mobile-pause": App.togglePause(); break;
+          case "mobile-menu": App.togglePanel(); break;
+          case "mobile-forgot":
+            DOM.distractionModal.classList.add("show");
+            DOM.customDistractionInput.value = "";
+            break;
 
           case "edit-task":
             App.editTask(Number.parseInt(actionEl.dataset.index, 10));
@@ -2990,6 +3324,11 @@
       });
 
       DOM.panelTrigger.addEventListener("click", () => App.togglePanel());
+
+      // Mobile overlay click to close panel
+      if (DOM.panelOverlay) {
+        DOM.panelOverlay.addEventListener("click", () => App.closePanel());
+      }
 
       // 任务输入：用 input 实时写回，避免 change+index 的偶发错写
       DOM.taskList.addEventListener("input", (e) => {
@@ -3069,4 +3408,3 @@
 </body>
 
 </html>
-

@@ -1321,6 +1321,9 @@
       <path
         d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6V11c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5S10.5 3.17 10.5 4v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
     </symbol>
+    <symbol id="icon-clipboard" viewBox="0 0 24 24">
+      <path d="M19 2h-4.18C14.4.84 13.3 0 12 0c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm7 18H5V4h2v3h10V4h2v16z" />
+    </symbol>
   </svg>
 
   <!-- measure span -->
@@ -1412,6 +1415,11 @@
                 <svg class="icon">
                   <use href="#icon-upload"></use>
                 </svg> 导入
+              </button>
+              <button class="btn btn-config" data-action="import-clipboard">
+                <svg class="icon">
+                  <use href="#icon-clipboard"></use>
+                </svg> 粘贴导入
               </button>
               <button class="btn btn-config primary" data-action="save-preset">
                 <svg class="icon">
@@ -2268,14 +2276,14 @@
           const duration = 10.0;
           const baseFreq = 432;
 
-          // 主增益：稍微快速的 Attack，模拟“肉感”打击
+          // 主增益：稍微快速的 Attack，模拟"肉感"打击
           const master = ctx.createGain();
           master.gain.setValueAtTime(0, now);
-          // 0.04s 是关键：比金属敲击(0.01)慢，比风琴(0.5)快，这是“包布木槌”的时间
+          // 0.04s 是关键：比金属敲击(0.01)慢，比风琴(0.5)快，这是"包布木槌"的时间
           master.gain.linearRampToValueAtTime(0.5, now + 0.04);
           master.gain.exponentialRampToValueAtTime(0.0001, now + duration);
 
-          // 关键：使用 Bandpass（带通）代替 Lowpass，制造“空腔共鸣”
+          // 关键：使用 Bandpass（带通）代替 Lowpass，制造"空腔共鸣"
           const bandpass = ctx.createBiquadFilter();
           bandpass.type = "bandpass";
           bandpass.frequency.setValueAtTime(baseFreq * 1.5, now); // 聚焦在核心共鸣区
@@ -2287,7 +2295,7 @@
           // 重新构建：1个重低音基频 + 2个微差共振对 + 1个瞬态打击音
           const components = [
             { f: baseFreq, g: 0.7, lfoF: 0.2, w: 0.1 },        // 核心基音
-            { f: baseFreq * 1.003, g: 0.4, lfoF: 0.5, w: 0.2 }, // 相位对：制造“嗡嗡”的空气晃动
+            { f: baseFreq * 1.003, g: 0.4, lfoF: 0.5, w: 0.2 }, // 相位对：制造"嗡嗡"的空气晃动
             { f: baseFreq * 0.5, g: 0.3, lfoF: 0.1, w: 0.05 },  // 底座音：增加厚重感
             { f: baseFreq * 2.41, g: 0.1, lfoF: 1.5, w: 0.02 }  // 唯一的高位分量：增加辨识度
           ];
@@ -2321,7 +2329,7 @@
             lfo.stop(now + duration);
           });
 
-          // --- 核心新增：模拟“木槌撞击”的瞬态低频 ---
+          // --- 核心新增：模拟"木槌撞击"的瞬态低频 ---
           const thud = ctx.createOscillator();
           const thudGain = ctx.createGain();
           thud.type = "sine";
@@ -2726,6 +2734,78 @@
         reader.readAsText(file);
       },
 
+      async importFromClipboard() {
+        try {
+          // Check if clipboard API is available
+          if (!navigator.clipboard || !navigator.clipboard.readText) {
+            UI.toast("浏览器不支持读取剪贴板", "error");
+            return;
+          }
+
+          const text = await navigator.clipboard.readText();
+          
+          if (!text || !text.trim()) {
+            UI.toast("剪贴板为空", "error");
+            return;
+          }
+
+          let config;
+          try {
+            config = JSON.parse(text);
+          } catch (parseErr) {
+            UI.toast("剪贴板内容不是有效的 JSON", "error");
+            return;
+          }
+
+          if (!config.tasks || !Array.isArray(config.tasks)) {
+            UI.toast("JSON 格式无效：缺少 tasks 数组", "error");
+            return;
+          }
+
+          if (config.tasks.length === 0) {
+            UI.toast("JSON 中没有任务步骤", "error");
+            return;
+          }
+
+          // Ensure task IDs
+          Storage.ensureTaskIds(config.tasks);
+
+          let name = config.name || "剪贴板导入";
+          let counter = 1;
+          while (State.presets.some(p => p.name === name)) {
+            name = `${config.name || "剪贴板导入"} (${counter++})`;
+          }
+
+          const newPreset = {
+            id: "clipboard_" + Date.now(),
+            name,
+            tasks: Utils.deepClone(config.tasks),
+            createdAt: Date.now(),
+            source: "imported"
+          };
+
+          State.presets.push(newPreset);
+          State.tasks = Utils.deepClone(config.tasks);
+          State.currentPresetId = newPreset.id;
+
+          Storage.savePresets();
+          Storage.saveTasks();
+          Storage.saveCurrentPreset();
+
+          UI.renderPresets();
+          UI.renderTasks();
+          UI.toast(`已从剪贴板导入「${name}」（${config.tasks.length} 步骤）`);
+
+        } catch (err) {
+          // Handle permission denied or other errors
+          if (err.name === "NotAllowedError") {
+            UI.toast("请允许读取剪贴板权限", "error");
+          } else {
+            UI.toast("导入失败：" + err.message, "error");
+          }
+        }
+      },
+
       savePreset(name) {
         const newPreset = {
           id: "preset_" + Date.now(),
@@ -2823,6 +2903,7 @@
 
           case "export": App.exportConfig(); break;
           case "import": DOM.fileInput.click(); break;
+          case "import-clipboard": App.importFromClipboard(); break;
 
           case "save-preset":
             DOM.saveModal.classList.add("show");
@@ -2986,6 +3067,5 @@
     document.addEventListener("DOMContentLoaded", init);
   </script>
 </body>
-
 
 </html>

@@ -17,7 +17,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="License">
-  <img src="https://img.shields.io/badge/version-1.1-green.svg?style=flat-square" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.2-green.svg?style=flat-square" alt="Version">
   <img src="https://img.shields.io/badge/pure-frontend-orange.svg?style=flat-square" alt="Pure Frontend">
 </p>
 

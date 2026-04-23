@@ -79,40 +79,28 @@ const Timer = {
   intervalId: null,
 
   start() {
-    console.log('Timer.start called, currentTaskIndex=', State.currentTaskIndex, 'isRunning=', State.isRunning);
     this.stop();
     this.tick();
     this.intervalId = window.setInterval(() => this.tick(), 1000);
-    console.log('Timer.start done, intervalId=', this.intervalId);
   },
 
   tick() {
-    console.log('Timer.tick called, isRunning=', State.isRunning, 'isPaused=', State.isPaused);
-    console.log('Timer.tick taskIndex=', State.currentTaskIndex, 'tasks=', State.tasks.length);
-
-    if (!State.isRunning) { console.log('Timer.tick early exit: not running'); return; }
-    if (State.isPaused) { console.log('Timer.tick early exit: paused'); return; }
+    if (!State.isRunning) return;
+    if (State.isPaused) return;
 
     const task = State.tasks[State.currentTaskIndex];
-    console.log('Timer.tick task=', task);
-    if (!task) { console.log('Timer.tick early exit: no task'); return; }
+    if (!task) return;
 
     const startTime = State.taskStats.startTime;
-    console.log('Timer.tick startTime=', startTime);
-    if (!startTime) { console.log('Timer.tick early exit: no startTime'); return; }
+    if (!startTime) return;
 
-    const now = Date.now();
-    console.log('Timer.tick now=', now);
+    Chime.tick(Date.now());
 
-    Chime.tick(now);
-
-    const totalElapsed = (now - startTime) / 1000;
+    const totalElapsed = (Date.now() - startTime) / 1000;
     const activeElapsed = totalElapsed - (State.taskStats.pauseDuration || 0);
 
     const taskTotalSeconds = (task.mins || 1) * 60;
     const remaining = taskTotalSeconds - activeElapsed;
-
-    console.log('Timer.tick remaining=', remaining);
 
     if (remaining > 0) {
       State.timeLeft = Math.ceil(remaining);
@@ -125,10 +113,6 @@ const Timer = {
       State.overtimeSeconds = Math.floor(Math.abs(remaining));
     }
 
-    console.log('Timer.tick updated timeLeft=', State.timeLeft);
-
-    // Update DOM
-    console.log('Timer.tick UI available:', typeof UI);
     UI.updateTimer();
     UI.updateProgress();
     UI.updateETA();

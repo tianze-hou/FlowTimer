@@ -7,3 +7,12 @@
 [2026-04-23T23:00:47.808Z] ℹ️  🎧 [INFO] [Listener] connected to OpenCode global event stream
 [2026-04-23T23:00:47.898Z] ℹ️  🔹 [INFO] ✅ Feishu Webhook Server listening on port 3000
 [2026-04-23T23:00:47.900Z] ℹ️  🪶 [INFO] [Feishu] Callback URL: http://127.0.0.1:3000
+[2026-04-23T23:20:54.379Z] ℹ️  🧩 [INFO] [Plugin] bridge entry initializing logFile=D:\local_repositories\github\FlowTimer\logs\bridge.log pid=222888 instance=222888-yymdt1vz
+[2026-04-23T23:20:59.520Z] ℹ️  📁 [INFO] [FileStore] using default store dir: D:\local_repositories\github\FlowTimer\bridge_files
+[2026-04-23T23:20:59.548Z] ℹ️  🧩 [INFO] [Plugin] started adapter=lark-bridge
+[2026-04-23T23:20:59.559Z] ℹ️  🎧 [INFO] [Listener] starting global event subscription (MUX)
+[2026-04-23T23:20:59.561Z] ℹ️  🧩 [INFO] [Plugin] BridgePlugin ready
+[2026-04-23T23:20:59.562Z] ℹ️  🎧 [INFO] [Listener] connected to OpenCode event stream
+[2026-04-23T23:20:59.564Z] ℹ️  🎧 [INFO] [Listener] connected to OpenCode global event stream
+[2026-04-23T23:20:59.826Z] ℹ️  🔹 [INFO] ✅ Feishu Webhook Server listening on port 3000
+[2026-04-23T23:20:59.830Z] ℹ️  🪶 [INFO] [Feishu] Callback URL: http://127.0.0.1:3000

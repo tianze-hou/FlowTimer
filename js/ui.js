@@ -526,4 +526,4 @@ const UI = {
   }
 };
 
-export { UI, EmojiSizer, DOM };
+export { UI, EmojiSizer, DOM, cacheDOM };

@@ -1,7 +1,7 @@
 import { Utils, State } from './utils.js';
 import { Storage } from './storage.js';
 import { Audio } from './audio.js';
-import { UI } from './ui.js';
+import { UI, DOM } from './ui.js';
 import { Timer, Chime } from './timer.js';
 
 const App = {

@@ -1,6 +1,7 @@
 import { State } from './utils.js';
+import { Utils } from './utils.js';
 import { Storage } from './storage.js';
-import { UI, EmojiSizer, DOM } from './ui.js';
+import { UI, EmojiSizer, DOM, cacheDOM } from './ui.js';
 import { App } from './app.js';
 import { Timer, Chime } from './timer.js';
 

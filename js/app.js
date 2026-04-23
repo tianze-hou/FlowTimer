@@ -6,6 +6,7 @@ import { Timer, Chime } from './timer.js';
 
 const App = {
   startRoutine() {
+    console.log('App.startRoutine called');
     if (!State.tasks.length) {
       UI.toast("请先添加至少一个步骤", "error");
       return;
@@ -24,6 +25,7 @@ const App = {
   },
 
   runTask() {
+    console.log('App.runTask called, currentTaskIndex=', State.currentTaskIndex);
     if (State.currentTaskIndex >= State.tasks.length) {
       this.finishRoutine();
       return;
